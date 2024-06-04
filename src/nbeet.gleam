@@ -72,28 +72,3 @@ pub fn encode(nbt: Nbt) {
 pub fn decode(bit_array: BitArray, decoder: dynamic.Decoder(t)) {
   decoder.decode(bit_array, decoder)
 }
-// pub fn decode(nbt: BitArray) {
-//   case decode_tag(nbt) {
-//     Ok(tag.Compound(result)) -> Ok(result)
-//     _ -> Error(Nil)
-//   }
-// }
-
-// fn decode_tag(nbt: BitArray) {
-//   case nbt {
-//     <<0, _rest:bytes>> -> Ok(End)
-//     <<1, _rest:bytes>> -> Ok(Byte(<<0>>))
-//     <<2, _rest:bytes>> -> Ok(Short(0))
-//     <<3, _rest:bytes>> -> Ok(Int(0))
-//     <<4, _rest:bytes>> -> Ok(Long(0))
-//     <<5, _rest:bytes>> -> Ok(Float(0.0))
-//     <<6, _rest:bytes>> -> Ok(Double(0.0))
-//     <<7, _rest:bytes>> -> Ok(ByteArray(<<0>>))
-//     <<8, _rest:bytes>> -> Ok(String(""))
-//     <<9, _rest:bytes>> -> Ok(List([]))
-//     <<10, _rest:bytes>> -> Ok(Compound(dict.new()))
-//     <<11, _rest:bytes>> -> Ok(IntArray([]))
-//     <<12, _rest:bytes>> -> Ok(LongArray([]))
-//     _ -> Error(Nil)
-//   }
-// }

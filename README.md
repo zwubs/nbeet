@@ -1,25 +1,60 @@
-# nbeet
+<div align="center">
+  <a href="https://github.com/zwubs/nbeet">
+    <img src="https://cdn.dribbble.com/users/8717/screenshots/5296186/media/c0918515437f92662ff94ee89a7637fe.png" alt="nbeet logo" width="128" height="128">
+  </a>
+
+  <h1 align="center" style="margin-bottom: 0; margin-top: 1rem;">nbeet</h1>
+
+  <p align="center">An NBT encoder and decoder for gleam</p>
 
 [![Package Version](https://img.shields.io/hexpm/v/nbeet)](https://hex.pm/packages/nbeet)
 [![Hex Docs](https://img.shields.io/badge/hex-docs-ffaff3)](https://hexdocs.pm/nbeet/)
 
+</div>
+
+## About
+`nbeet` is a gleam package for all your NBT needs. For those that don't know NBT (Named Binary Tag) is a file format utilized by the game Minecraft for storing information. This package focuses on encoding and decoding NBT data and has syntax inspired by [`gleam_json`](https://github.com/gleam-lang/json) and [`bison`](https://github.com/massivefermion/bison) packages.
+
+## Installation
+Add `nbeet` to your Gleam project.
+
 ```sh
 gleam add nbeet
 ```
-```gleam
-import nbeet
 
-pub fn main() {
-  // TODO: An example of the project in use
+## Usage
+### Encoding
+```gleam
+import nbeet.{byte, compound, nbt, string}
+
+pub fn encode_truth() -> Result(BitArray, Nil) {
+  let nbt = 
+    nbt(
+      "in beet we",
+      compound([#("must", string("true")), #("trust", boolean(True))])
+    )
+  nbeet.encode(nbt)
 }
 ```
 
-Further documentation can be found at <https://hexdocs.pm/nbeet>.
+### Decoding
+```gleam
+import gleam/dynamic
+import gleam/result
+import nbeet
 
-## Development
+pub type TheTruth {
+  TheTruth(must: String, trust: Bool)
+}
 
-```sh
-gleam run   # Run the project
-gleam test  # Run the tests
-gleam shell # Run an Erlang shell
+fn decode_truth(nbt: BitArray) -> Result(TheTruth, Nil) {
+  let decoder =
+    dynamic.decode2(
+      TheTruth,
+      dynamic.field("must", dynamic.string),
+      dynamic.field("trust", dynamic.bool),
+    )
+  use #(name, the_truth) <- result.try(nbeet.decode(nbt, decoder))
+  the_truth
+}
 ```
