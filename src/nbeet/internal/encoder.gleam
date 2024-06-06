@@ -16,7 +16,7 @@ fn encode_root_compound(name: String, tag: Tag) {
     tag.Compound(compound) -> {
       let name = encode_string(name)
       let encoded_compound = encode_compound(compound)
-      Ok(<<type_id.compound:bits, name:bits, encoded_compound:bits>>)
+      Ok(<<type_id.compound:int, name:bits, encoded_compound:bits>>)
     }
     _ -> Error(Nil)
   }
@@ -40,8 +40,8 @@ fn encode_tag(tag: Tag) {
   }
 }
 
-fn encode_byte(byte: BitArray) {
-  <<byte:bits-size(8)>>
+fn encode_byte(byte: Int) {
+  <<byte:size(8)>>
 }
 
 fn encode_short(short: Int) {
@@ -83,9 +83,9 @@ fn encode_list(list: List(Tag)) {
         list.fold(list, <<>>, fn(bit_array, tag) {
           bit_array.append(bit_array, encode_tag(tag))
         })
-      <<type_id:bits, length:size(32), encoded_tags:bits, type_id.end:bits>>
+      <<type_id:int, length:size(32), encoded_tags:bits, type_id.end:int>>
     }
-    _ -> <<type_id.end:bits, 0:size(32)>>
+    _ -> <<type_id.end:int, 0:size(32)>>
   }
 }
 
@@ -101,11 +101,11 @@ fn encode_compound(compound: Dict(String, Tag)) {
     let name = encode_string(name)
     let encoded_tag = encode_tag(tag)
     builder
-    |> bytes_builder.append(type_id)
+    |> bytes_builder.append(<<type_id:int>>)
     |> bytes_builder.append(name)
     |> bytes_builder.append(encoded_tag)
   })
-  |> bytes_builder.append(type_id.end)
+  |> bytes_builder.append(<<type_id.end:int>>)
   |> bytes_builder.to_bit_array
 }
 

@@ -10,14 +10,14 @@ pub fn nbt(name: String, tag: Tag) {
   Nbt(name, tag)
 }
 
-pub fn byte(byte: BitArray) -> Tag {
+pub fn byte(byte: Int) -> Tag {
   tag.Byte(byte)
 }
 
 pub fn boolean(boolean: Bool) -> Tag {
   case boolean {
-    True -> tag.Byte(<<1>>)
-    False -> tag.Byte(<<0>>)
+    True -> tag.Byte(1)
+    False -> tag.Byte(0)
   }
 }
 

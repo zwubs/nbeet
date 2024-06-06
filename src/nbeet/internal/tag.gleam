@@ -2,7 +2,7 @@ import gleam/dict.{type Dict}
 
 pub type Tag {
   End
-  Byte(BitArray)
+  Byte(Int)
   Short(Int)
   Int(Int)
   Long(Int)

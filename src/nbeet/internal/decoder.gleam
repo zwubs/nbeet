@@ -17,7 +17,7 @@ pub fn decode(bit_array: BitArray, decoder: dynamic.Decoder(t)) {
 
 fn decode_root_compound(bit_array: BitArray) {
   case bit_array {
-    <<type_id:bits-size(8), bit_array:bits>> -> {
+    <<type_id:int, bit_array:bits>> -> {
       case type_id {
         type_id if type_id == type_ids.compound -> {
           use #(name, bit_array) <- result.try(decode_string(bit_array))
@@ -31,7 +31,7 @@ fn decode_root_compound(bit_array: BitArray) {
   }
 }
 
-fn decode_tag_of_type(bit_array: BitArray, type_id: BitArray) -> DecoderResult {
+fn decode_tag_of_type(bit_array: BitArray, type_id: Int) -> DecoderResult {
   case type_id {
     _ if type_id == type_ids.end -> wrap(Ok(#(Nil, bit_array)))
     _ if type_id == type_ids.byte -> wrap(decode_byte(bit_array))
@@ -59,7 +59,7 @@ fn wrap(result: Result(#(value, BitArray), Nil)) {
 
 fn decode_byte(bit_array: BitArray) {
   case bit_array {
-    <<bytes:bits-size(8), bit_array:bytes>> -> Ok(#(bytes, bit_array))
+    <<byte:size(8), bit_array:bytes>> -> Ok(#(byte, bit_array))
     _ -> Error(Nil)
   }
 }
@@ -132,7 +132,7 @@ fn decode_list(bit_array: BitArray) {
 
 fn decode_list_of_length(
   bit_array: BitArray,
-  type_id: BitArray,
+  type_id: Int,
   list: List(Dynamic),
   length: Int,
 ) {
