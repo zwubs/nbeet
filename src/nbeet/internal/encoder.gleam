@@ -61,7 +61,7 @@ fn encode_float(float: Float) {
 }
 
 fn encode_double(double: Float) {
-  <<double:float-size(32)>>
+  <<double:float-size(64)>>
 }
 
 fn encode_byte_array(byte_array: BitArray) {
