@@ -25,7 +25,7 @@ const byte_test_nbt = <<
 >>
 
 pub fn encode_byte_test() {
-  let nbt = nbt("", compound([#("a", byte(<<127>>)), #("b", byte(<<127>>))]))
+  let nbt = nbt("", compound([#("a", byte(127)), #("b", byte(127))]))
   use encoded_nbt <- result.try(nbeet.encode(nbt))
   should.equal(bit_array.inspect(encoded_nbt), bit_array.inspect(byte_test_nbt))
   Ok(Nil)

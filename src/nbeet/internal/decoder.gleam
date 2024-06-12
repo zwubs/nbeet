@@ -1,6 +1,7 @@
 import gleam/bit_array
 import gleam/dict.{type Dict}
 import gleam/dynamic.{type Dynamic, from}
+import gleam/list
 import gleam/result
 import nbeet/internal/type_id as type_ids
 
@@ -8,10 +9,11 @@ type DecoderResult =
   Result(#(Dynamic, BitArray), Nil)
 
 pub fn decode(bit_array: BitArray, decoder: dynamic.Decoder(t)) {
-  use #(root_name, dynamic_value) <- result.then(decode_root_compound(bit_array))
-  use decoded_value <- result.try(
-    decoder(dynamic_value) |> result.replace_error(Nil),
+  use #(root_name, dynamic_value) <- result.then(
+    decode_root_compound(bit_array)
+    |> result.replace_error([]),
   )
+  use decoded_value <- result.try(decoder(dynamic_value))
   Ok(#(root_name, decoded_value))
 }
 
@@ -59,42 +61,43 @@ fn wrap(result: Result(#(value, BitArray), Nil)) {
 
 fn decode_byte(bit_array: BitArray) {
   case bit_array {
-    <<byte:size(8), bit_array:bytes>> -> Ok(#(byte, bit_array))
+    <<byte:int-signed-big-size(8), bit_array:bytes>> -> Ok(#(byte, bit_array))
     _ -> Error(Nil)
   }
 }
 
 fn decode_short(bit_array: BitArray) {
   case bit_array {
-    <<short:int-signed-size(16), bit_array:bytes>> -> Ok(#(short, bit_array))
+    <<short:int-signed-big-size(16), bit_array:bytes>> ->
+      Ok(#(short, bit_array))
     _ -> Error(Nil)
   }
 }
 
 fn decode_int(bit_array: BitArray) {
   case bit_array {
-    <<int:int-signed-size(32), bit_array:bytes>> -> Ok(#(int, bit_array))
+    <<int:int-signed-big-size(32), bit_array:bytes>> -> Ok(#(int, bit_array))
     _ -> Error(Nil)
   }
 }
 
 fn decode_long(bit_array: BitArray) {
   case bit_array {
-    <<long:int-signed-size(64), bit_array:bytes>> -> Ok(#(long, bit_array))
+    <<long:int-signed-big-size(64), bit_array:bytes>> -> Ok(#(long, bit_array))
     _ -> Error(Nil)
   }
 }
 
 fn decode_float(bit_array: BitArray) {
   case bit_array {
-    <<float:float-size(32), bit_array:bytes>> -> Ok(#(float, bit_array))
+    <<float:float-big-size(32), bit_array:bytes>> -> Ok(#(float, bit_array))
     _ -> Error(Nil)
   }
 }
 
 fn decode_double(bit_array: BitArray) {
   case bit_array {
-    <<double:float-size(64), bit_array:bytes>> -> Ok(#(double, bit_array))
+    <<double:float-big-size(64), bit_array:bytes>> -> Ok(#(double, bit_array))
     _ -> Error(Nil)
   }
 }
@@ -143,7 +146,12 @@ fn decode_list_of_length(
         bit_array,
         type_id,
       ))
-      decode_list_of_length(bit_array, type_id, [element, ..list], length - 1)
+      decode_list_of_length(
+        bit_array,
+        type_id,
+        list.append(list, [element]),
+        length - 1,
+      )
     }
   }
 }

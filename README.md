@@ -1,6 +1,6 @@
 <div align="center">
   <a href="https://github.com/zwubs/nbeet">
-    <img src="https://cdn.dribbble.com/users/8717/screenshots/5296186/media/c0918515437f92662ff94ee89a7637fe.png" alt="nbeet logo" width="128" height="128">
+    <img src="https://raw.githubusercontent.com/zwubs/nbeet/main/src/images/nbeet.png" alt="nbeet logo" width="128" height="128">
   </a>
 
   <h1 align="center" style="margin-bottom: 0; margin-top: 1rem;">nbeet</h1>
@@ -31,7 +31,7 @@ pub fn encode_truth() -> Result(BitArray, Nil) {
   let nbt = 
     nbt(
       "in beet we",
-      compound([#("must", string("true")), #("trust", boolean(True))])
+      compound([#("trust", boolean(True)), #("must", string("true")), ])
     )
   nbeet.encode(nbt)
 }
@@ -43,18 +43,18 @@ import gleam/dynamic
 import gleam/result
 import nbeet
 
-pub type TheTruth {
-  TheTruth(must: String, trust: Bool)
+pub type InBeetWe {
+  InBeetWe(trust: Bool, must: String)
 }
 
-fn decode_truth(nbt: BitArray) -> Result(TheTruth, Nil) {
+fn decode_truth(nbt: BitArray) -> Result(InBeetWe, Nil) {
   let decoder =
     dynamic.decode2(
-      TheTruth,
-      dynamic.field("must", dynamic.string),
+      InBeetWe,
       dynamic.field("trust", dynamic.bool),
+      dynamic.field("must", dynamic.string),
     )
-  use #(name, the_truth) <- result.try(nbeet.decode(nbt, decoder))
-  the_truth
+  use #(name, in_beet_we) <- result.try(nbeet.decode(nbt, decoder))
+  Ok(in_beet_we)
 }
 ```
