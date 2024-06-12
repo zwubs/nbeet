@@ -1,6 +1,6 @@
 <div align="center">
   <a href="https://github.com/zwubs/nbeet">
-    <img src="https://raw.githubusercontent.com/zwubs/nbeet/main/src/images/nbeet.png" alt="nbeet logo" width="128" height="128">
+    <img src="https://raw.githubusercontent.com/zwubs/nbeet/main/images/nbeet.png" alt="nbeet logo" width="128" height="128">
   </a>
 
   <h1 align="center" style="margin-bottom: 0; margin-top: 1rem;">nbeet</h1>
