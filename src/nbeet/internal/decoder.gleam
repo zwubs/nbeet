@@ -112,9 +112,12 @@ fn decode_byte_array(bit_array: BitArray) {
 }
 
 fn decode_string(bit_array: BitArray) {
-  use #(length, bit_array) <- result.try(decode_short(bit_array))
   case bit_array {
-    <<string_bytes:bytes-size(length), bit_array:bytes>> -> {
+    <<
+      length:int-unsigned-big-size(16),
+      string_bytes:bytes-size(length),
+      bit_array:bytes,
+    >> -> {
       use string <- result.try(string_from_bytes(string_bytes))
       Ok(#(string, bit_array))
     }

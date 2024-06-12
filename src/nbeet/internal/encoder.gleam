@@ -41,37 +41,37 @@ fn encode_tag(tag: Tag) {
 }
 
 fn encode_byte(byte: Int) {
-  <<byte:size(8)>>
+  <<byte:int-big-size(8)>>
 }
 
 fn encode_short(short: Int) {
-  <<short:size(16)>>
+  <<short:int-big-size(16)>>
 }
 
 fn encode_int(int: Int) {
-  <<int:size(32)>>
+  <<int:int-big-size(32)>>
 }
 
 fn encode_long(long: Int) {
-  <<long:size(64)>>
+  <<long:int-big-size(64)>>
 }
 
 fn encode_float(float: Float) {
-  <<float:float-size(32)>>
+  <<float:float-big-size(32)>>
 }
 
 fn encode_double(double: Float) {
-  <<double:float-size(64)>>
+  <<double:float-big-size(64)>>
 }
 
 fn encode_byte_array(byte_array: BitArray) {
   let length = bit_array.byte_size(byte_array)
-  <<length:size(32), byte_array:bits>>
+  <<length:int-big-size(32), byte_array:bits>>
 }
 
 fn encode_string(string: String) {
   let length = string.length(string)
-  <<length:size(16), string:utf8>>
+  <<length:int-big-size(16), string:utf8>>
 }
 
 fn encode_list(list: List(Tag)) {
@@ -115,7 +115,7 @@ fn encode_int_array(int_array: List(Int)) {
     list.fold(int_array, <<>>, fn(bit_array, tag) {
       bit_array.append(bit_array, encode_int(tag))
     })
-  <<length:size(32), encoded_ints:bits>>
+  <<length:int-big-size(32), encoded_ints:bits>>
 }
 
 fn encode_long_array(long_array: List(Int)) {
@@ -124,5 +124,5 @@ fn encode_long_array(long_array: List(Int)) {
     list.fold(long_array, <<>>, fn(bit_array, tag) {
       bit_array.append(bit_array, encode_long(tag))
     })
-  <<length:size(32), encoded_ints:bits>>
+  <<length:int-big-size(32), encoded_ints:bits>>
 }
