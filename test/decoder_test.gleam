@@ -1,4 +1,5 @@
 import gleam/dynamic
+import gleam/io
 import gleam/option
 import gleeunit/should
 import nbeet
@@ -148,11 +149,34 @@ pub fn decode_string_test() {
 }
 
 pub type ListTest {
-  ListTest(value: List(Int), empty: List(Int), nested: List(List(String)))
+  ListTest(
+    value: List(Int),
+    empty: List(Int),
+    empty_end: List(Int),
+    empty_negative: List(Int),
+    nested: List(List(String)),
+  )
 }
 
 pub fn decode_list_test() {
-  todo
+  let assert Ok(nbt) = simplifile.read_bits("test/nbt/list_test.nbt")
+  let decoder =
+    dynamic.decode5(
+      ListTest,
+      dynamic.field("list", dynamic.list(dynamic.int)),
+      dynamic.field("list_empty", dynamic.list(dynamic.int)),
+      dynamic.field("list_empty_end", dynamic.list(dynamic.int)),
+      dynamic.field("list_empty_negative", dynamic.list(dynamic.int)),
+      dynamic.field("list_nested", dynamic.list(dynamic.list(dynamic.string))),
+    )
+  let #(_, list_test) = should.be_ok(nbeet.decode(nbt, decoder))
+  should.equal(list_test.value, [42])
+  should.equal(list_test.empty, [])
+  // List with an END type id
+  should.equal(list_test.empty_end, [])
+  // List with a negative length
+  should.equal(list_test.empty_negative, [])
+  should.equal(list_test.nested, [["egg"]])
 }
 
 pub fn decode_compound_test() {
