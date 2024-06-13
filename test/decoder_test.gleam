@@ -1,5 +1,5 @@
-import gleam/bit_array
 import gleam/dynamic
+import gleam/option
 import gleeunit/should
 import nbeet
 import simplifile
@@ -108,20 +108,24 @@ pub fn decode_double_test() {
 }
 
 pub type ByteArrayTest {
-  ByteArrayTest(value: BitArray, empty: BitArray)
+  ByteArrayTest(value: BitArray, empty: BitArray, min: BitArray, max: BitArray)
 }
 
 pub fn decode_byte_array_test() {
   let assert Ok(nbt) = simplifile.read_bits("test/nbt/byte_array_test.nbt")
   let decoder =
-    dynamic.decode2(
+    dynamic.decode4(
       ByteArrayTest,
       dynamic.field("byte_array", dynamic.bit_array),
       dynamic.field("byte_array_empty", dynamic.bit_array),
+      dynamic.field("byte_array_min", dynamic.bit_array),
+      dynamic.field("byte_array_max", dynamic.bit_array),
     )
   let #(_, byte_array_test) = should.be_ok(nbeet.decode(nbt, decoder))
   should.equal(byte_array_test.value, <<42>>)
   should.equal(byte_array_test.empty, <<>>)
+  should.equal(byte_array_test.min, <<0>>)
+  should.equal(byte_array_test.max, <<255>>)
 }
 
 pub type StringTest {
@@ -137,10 +141,14 @@ pub fn decode_string_test() {
       dynamic.field("string_empty", dynamic.string),
       dynamic.field("string_emoji", dynamic.string),
     )
-  let #(_, byte_array_test) = should.be_ok(nbeet.decode(nbt, decoder))
-  should.equal(byte_array_test.value, "42")
-  should.equal(byte_array_test.empty, "")
-  should.equal(byte_array_test.emoji, "⭐")
+  let #(_, string_test) = should.be_ok(nbeet.decode(nbt, decoder))
+  should.equal(string_test.value, "42")
+  should.equal(string_test.empty, "")
+  should.equal(string_test.emoji, "⭐")
+}
+
+pub type ListTest {
+  ListTest(value: List(Int), empty: List(Int), nested: List(List(String)))
 }
 
 pub fn decode_list_test() {

@@ -1,7 +1,6 @@
 import gleam/dict
 import gleam/dynamic
 import gleam/list
-import nbeet/gzip
 import nbeet/internal/decoder
 import nbeet/internal/encoder
 import nbeet/internal/nbt.{type Nbt, Nbt}
