@@ -224,10 +224,32 @@ pub fn decode_compound_test() {
   should.equal(compound_test.nester.nested.nest, "egg")
 }
 
+pub type ArrayTest {
+  ArrayTest(value: List(Int), empty: List(Int))
+}
+
 pub fn decode_int_array_test() {
-  todo
+  let assert Ok(nbt) = simplifile.read_bits("test/nbt/int_array_test.nbt")
+  let decoder =
+    dynamic.decode2(
+      ArrayTest,
+      dynamic.field("int_array", dynamic.list(dynamic.int)),
+      dynamic.field("int_array_empty", dynamic.list(dynamic.int)),
+    )
+  let #(_, int_array_test) = should.be_ok(nbeet.decode(nbt, decoder))
+  should.equal(int_array_test.value, [42])
+  should.equal(int_array_test.empty, [])
 }
 
 pub fn decode_long_array_test() {
-  todo
+  let assert Ok(nbt) = simplifile.read_bits("test/nbt/long_array_test.nbt")
+  let decoder =
+    dynamic.decode2(
+      ArrayTest,
+      dynamic.field("long_array", dynamic.list(dynamic.int)),
+      dynamic.field("long_array_empty", dynamic.list(dynamic.int)),
+    )
+  let #(_, long_array_test) = should.be_ok(nbeet.decode(nbt, decoder))
+  should.equal(long_array_test.value, [42])
+  should.equal(long_array_test.empty, [])
 }
