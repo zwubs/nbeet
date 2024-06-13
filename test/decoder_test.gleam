@@ -1,3 +1,4 @@
+import gleam/dict
 import gleam/dynamic
 import gleam/io
 import gleam/option
@@ -179,8 +180,48 @@ pub fn decode_list_test() {
   should.equal(list_test.nested, [["egg"]])
 }
 
+pub type ValueCompoundTest {
+  ValueCompoundTest(value: Int)
+}
+
+pub type NestedCompoundTest {
+  NestedCompoundTest(nest: String)
+}
+
+pub type NesterCompoundTest {
+  NesterCompoundTest(nested: NestedCompoundTest)
+}
+
+pub type CompoundTest {
+  CompoundTest(
+    value: ValueCompoundTest,
+    empty: dict.Dict(String, Int),
+    nester: NesterCompoundTest,
+  )
+}
+
 pub fn decode_compound_test() {
-  todo
+  let assert Ok(nbt) = simplifile.read_bits("test/nbt/compound_test.nbt")
+  let value_compound_decoder =
+    dynamic.decode1(ValueCompoundTest, dynamic.field("", dynamic.int))
+  let nested_compound_decoder =
+    dynamic.decode1(NestedCompoundTest, dynamic.field("nest", dynamic.string))
+  let nester_compound_decoder =
+    dynamic.decode1(
+      NesterCompoundTest,
+      dynamic.field("compound_nested", nested_compound_decoder),
+    )
+  let decoder =
+    dynamic.decode3(
+      CompoundTest,
+      dynamic.field("compound", value_compound_decoder),
+      dynamic.field("compound_empty", dynamic.dict(dynamic.string, dynamic.int)),
+      dynamic.field("compound_nester", nester_compound_decoder),
+    )
+  let #(_, compound_test) = should.be_ok(nbeet.decode(nbt, decoder))
+  should.equal(compound_test.value.value, 42)
+  should.equal(dict.size(compound_test.empty), 0)
+  should.equal(compound_test.nester.nested.nest, "egg")
 }
 
 pub fn decode_int_array_test() {
