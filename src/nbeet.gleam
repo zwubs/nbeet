@@ -14,13 +14,6 @@ pub fn byte(byte: Int) -> Tag {
   tag.Byte(byte)
 }
 
-pub fn boolean(boolean: Bool) -> Tag {
-  case boolean {
-    True -> tag.Byte(1)
-    False -> tag.Byte(0)
-  }
-}
-
 pub fn short(short: Int) -> Tag {
   tag.Short(short)
 }
