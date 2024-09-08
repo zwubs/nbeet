@@ -28,7 +28,7 @@ gleam add nbeet
 import nbeet.{byte, compound, nbt, string}
 
 pub fn encode_truth() -> Result(BitArray, Nil) {
-  let nbt = 
+  let nbt =
     nbt(
       "in beet we",
       compound([#("trust", byte(1)), #("must", string("true")), ])
@@ -49,11 +49,13 @@ pub type InBeetWe {
 
 fn decode_truth(nbt: BitArray) -> Result(InBeetWe, Nil) {
   let decoder =
-    dynamic.decode2(
-      InBeetWe,
-      dynamic.field("trust", dynamic.int),
-      dynamic.field("must", dynamic.string),
-    )
+    decode.into({
+      use trust <- decode.parameter
+      use must <- decode.parameter
+      InBeetWe(trust, must)
+    })
+    |> decode.field("trust", decode.int)
+    |> decode.field("must", decode.string)
   use #(name, in_beet_we) <- result.try(nbeet.decode(nbt, decoder))
   Ok(in_beet_we)
 }

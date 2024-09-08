@@ -1,3 +1,4 @@
+import decode
 import gleam/bit_array
 import gleam/dict.{type Dict}
 import gleam/dynamic.{type Dynamic, from}
@@ -8,12 +9,12 @@ import nbeet/internal/type_id as type_ids
 type DecoderResult =
   Result(#(Dynamic, BitArray), Nil)
 
-pub fn decode(bit_array: BitArray, decoder: dynamic.Decoder(t)) {
+pub fn decode(bit_array: BitArray, decoder: decode.Decoder(t)) {
   use #(root_name, dynamic_value) <- result.then(
     decode_root_compound(bit_array)
     |> result.replace_error([]),
   )
-  use decoded_value <- result.try(decoder(dynamic_value))
+  use decoded_value <- result.try(decode.from(decoder, dynamic_value))
   Ok(#(root_name, decoded_value))
 }
 
