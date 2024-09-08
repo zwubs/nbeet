@@ -1,4 +1,8 @@
 import decode
+import gleam/dict
+import gleam/dynamic
+import gleam/io
+import gleam/option
 import gleeunit/should
 import nbeet
 import simplifile
@@ -160,4 +164,138 @@ pub fn decode_string_test() {
   should.equal(string_test.value, "42")
   should.equal(string_test.empty, "")
   should.equal(string_test.emoji, "⭐")
+}
+
+pub type ListTest {
+  ListTest(
+    value: List(Int),
+    empty: List(Int),
+    empty_end: List(Int),
+    empty_negative: List(Int),
+    nested: List(List(String)),
+  )
+}
+
+fn list_test_decoder() {
+  decode.into({
+    use value <- decode.parameter
+    use empty <- decode.parameter
+    use empty_end <- decode.parameter
+    use empty_negative <- decode.parameter
+    use nested <- decode.parameter
+    ListTest(value, empty, empty_end, empty_negative, nested)
+  })
+  |> decode.field("list", decode.list(decode.int))
+  |> decode.field("list_empty", decode.list(decode.int))
+  |> decode.field("list_empty_end", decode.list(decode.int))
+  |> decode.field("list_empty_negative", decode.list(decode.int))
+  |> decode.field("list_nested", decode.list(decode.list(decode.string)))
+}
+
+pub fn decode_list_test() {
+  let assert Ok(nbt) = simplifile.read_bits("test/nbt/list_test.nbt")
+  let decoder = list_test_decoder()
+  let #(_, list_test) = should.be_ok(nbeet.decode(nbt, decoder))
+  should.equal(list_test.value, [42])
+  should.equal(list_test.empty, [])
+  // List with an END type id
+  should.equal(list_test.empty_end, [])
+  // List with a negative length
+  should.equal(list_test.empty_negative, [])
+  should.equal(list_test.nested, [["egg"]])
+}
+
+pub type ValueCompoundTest {
+  ValueCompoundTest(value: Int)
+}
+
+fn value_compound_test_decoder() {
+  decode.into({
+    use value <- decode.parameter
+    ValueCompoundTest(value)
+  })
+  |> decode.field("", decode.int)
+}
+
+pub type NestedCompoundTest {
+  NestedCompoundTest(nest: String)
+}
+
+fn nested_compound_test_decoder() {
+  decode.into({
+    use nest <- decode.parameter
+    NestedCompoundTest(nest)
+  })
+  |> decode.field("nest", decode.string)
+}
+
+pub type NesterCompoundTest {
+  NesterCompoundTest(nested: NestedCompoundTest)
+}
+
+fn nester_compound_test_decoder() {
+  decode.into({
+    use compound_nested <- decode.parameter
+    NesterCompoundTest(compound_nested)
+  })
+  |> decode.field("compound_nested", nested_compound_test_decoder())
+}
+
+pub type CompoundTest {
+  CompoundTest(
+    value: ValueCompoundTest,
+    empty: dict.Dict(String, Int),
+    nester: NesterCompoundTest,
+  )
+}
+
+fn compound_test_decoder() {
+  decode.into({
+    use compound <- decode.parameter
+    use compound_empty <- decode.parameter
+    use compound_nester <- decode.parameter
+    CompoundTest(compound, compound_empty, compound_nester)
+  })
+  |> decode.field("compound", value_compound_test_decoder())
+  |> decode.field("compound_empty", decode.dict(decode.string, decode.int))
+  |> decode.field("compound_nester", nester_compound_test_decoder())
+}
+
+pub fn decode_compound_test() {
+  let assert Ok(nbt) = simplifile.read_bits("test/nbt/compound_test.nbt")
+  let decoder = compound_test_decoder()
+  let #(_, compound_test) = should.be_ok(nbeet.decode(nbt, decoder))
+  should.equal(compound_test.value.value, 42)
+  should.equal(dict.size(compound_test.empty), 0)
+  should.equal(compound_test.nester.nested.nest, "egg")
+}
+
+pub type ArrayTest {
+  ArrayTest(value: List(Int), empty: List(Int))
+}
+
+fn array_test_decoder(field_prefix: String) {
+  decode.into({
+    use array <- decode.parameter
+    use empty <- decode.parameter
+    ArrayTest(array, empty)
+  })
+  |> decode.field(field_prefix <> "_array", decode.list(decode.int))
+  |> decode.field(field_prefix <> "_array_empty", decode.list(decode.int))
+}
+
+pub fn decode_int_array_test() {
+  let assert Ok(nbt) = simplifile.read_bits("test/nbt/int_array_test.nbt")
+  let decoder = array_test_decoder("int")
+  let #(_, int_array_test) = should.be_ok(nbeet.decode(nbt, decoder))
+  should.equal(int_array_test.value, [42])
+  should.equal(int_array_test.empty, [])
+}
+
+pub fn decode_long_array_test() {
+  let assert Ok(nbt) = simplifile.read_bits("test/nbt/long_array_test.nbt")
+  let decoder = array_test_decoder("long")
+  let #(_, long_array_test) = should.be_ok(nbeet.decode(nbt, decoder))
+  should.equal(long_array_test.value, [42])
+  should.equal(long_array_test.empty, [])
 }
