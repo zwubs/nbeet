@@ -1,5 +1,5 @@
+import decode
 import gleam/dict
-import gleam/dynamic
 import gleam/list
 import nbeet/internal/decoder
 import nbeet/internal/encoder
@@ -69,6 +69,6 @@ pub fn encode(nbt: Nbt) {
   encoder.encode(nbt)
 }
 
-pub fn decode(bit_array: BitArray, decoder: dynamic.Decoder(t)) {
+pub fn decode(bit_array: BitArray, decoder: decode.Decoder(t)) {
   decoder.decode(bit_array, decoder)
 }
