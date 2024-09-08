@@ -1,7 +1,7 @@
 import gleam/bit_array
 import gleam/result
 import gleeunit/should
-import nbeet.{byte, compound, nbt, short, string}
+import nbeet.{byte, compound, nbt, string}
 
 const hello_world_nbt = <<
   0x0A, 0x00, 0x0B, 0x68, 0x65, 0x6C, 0x6C, 0x6F, 0x20, 0x77, 0x6F, 0x72, 0x6C,

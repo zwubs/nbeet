@@ -1,8 +1,5 @@
 import decode
 import gleam/dict
-import gleam/dynamic
-import gleam/io
-import gleam/option
 import gleeunit/should
 import nbeet
 import simplifile
