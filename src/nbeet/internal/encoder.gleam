@@ -2,19 +2,18 @@ import gleam/bit_array
 import gleam/bytes_builder
 import gleam/dict.{type Dict}
 import gleam/list
+import gleam/option.{type Option, None, Some}
 import gleam/string
-import nbeet/internal/nbt.{type Nbt}
 import nbeet/internal/tag.{type Tag}
 import nbeet/internal/type_id
 
-pub fn encode(nbt: Nbt) {
-  encode_root_compound(nbt.name, nbt.tag)
-}
-
-fn encode_root_compound(name: String, tag: Tag) {
-  case tag {
+pub fn encode(root_tag: Tag, root_name: Option(String)) {
+  case root_tag {
     tag.Compound(compound) -> {
-      let name = encode_string(name)
+      let name = case root_name {
+        Some(name) -> encode_string(name)
+        None -> <<>>
+      }
       let encoded_compound = encode_compound(compound)
       Ok(<<type_id.compound:int, name:bits, encoded_compound:bits>>)
     }

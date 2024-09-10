@@ -56,7 +56,7 @@ fn decode_truth(nbt: BitArray) -> Result(InBeetWe, Nil) {
     })
     |> decode.field("trust", decode.int)
     |> decode.field("must", decode.string)
-  use #(name, in_beet_we) <- result.try(nbeet.decode(nbt, decoder))
+  use #(name, in_beet_we) <- result.try(nbeet.java_decode(nbt, decoder))
   Ok(in_beet_we)
 }
 ```

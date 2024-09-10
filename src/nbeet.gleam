@@ -1,13 +1,17 @@
 import decode
 import gleam/dict
 import gleam/list
+import gleam/option.{None, Some}
 import nbeet/internal/decoder
 import nbeet/internal/encoder
-import nbeet/internal/nbt.{type Nbt, Nbt}
 import nbeet/internal/tag.{type Tag}
 
-pub fn nbt(name: String, tag: Tag) {
-  Nbt(name, tag)
+pub opaque type Nbt {
+  Nbt(tag: Tag)
+}
+
+pub fn root(root: List(#(String, Tag))) {
+  Nbt(compound(root))
 }
 
 pub fn byte(byte: Int) -> Tag {
@@ -58,10 +62,18 @@ pub fn long_array(long_array: List(Int)) -> Tag {
   tag.LongArray(long_array)
 }
 
-pub fn encode(nbt: Nbt) {
-  encoder.encode(nbt)
+pub fn java_encode(nbt: Nbt, root_name: String) {
+  encoder.encode(nbt.tag, Some(root_name))
 }
 
-pub fn decode(bit_array: BitArray, decoder: decode.Decoder(t)) {
-  decoder.decode(bit_array, decoder)
+pub fn java_network_encode(nbt: Nbt) {
+  encoder.encode(nbt.tag, None)
+}
+
+pub fn java_decode(bit_array: BitArray, decoder: decode.Decoder(t)) {
+  decoder.java_decode(bit_array, decoder)
+}
+
+pub fn java_network_decode(bit_array: BitArray, decoder: decode.Decoder(t)) {
+  decoder.java_network_decode(bit_array, decoder)
 }

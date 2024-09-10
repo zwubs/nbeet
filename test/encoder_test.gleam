@@ -1,7 +1,7 @@
 import gleam/bit_array
 import gleam/result
 import gleeunit/should
-import nbeet.{byte, compound, nbt, string}
+import nbeet
 
 const hello_world_nbt = <<
   0x0A, 0x00, 0x0B, 0x68, 0x65, 0x6C, 0x6C, 0x6F, 0x20, 0x77, 0x6F, 0x72, 0x6C,
@@ -10,8 +10,8 @@ const hello_world_nbt = <<
 >>
 
 pub fn encode_hello_world_test() {
-  let nbt = nbt("hello world", compound([#("name", string("Bananrama"))]))
-  use encoded_nbt <- result.try(nbeet.encode(nbt))
+  let nbt = nbeet.root([#("name", nbeet.string("Bananrama"))])
+  use encoded_nbt <- result.try(nbeet.java_encode(nbt, "hello world"))
   should.equal(
     bit_array.inspect(encoded_nbt),
     bit_array.inspect(hello_world_nbt),
@@ -25,8 +25,8 @@ const byte_test_nbt = <<
 >>
 
 pub fn encode_byte_test() {
-  let nbt = nbt("", compound([#("a", byte(127)), #("b", byte(127))]))
-  use encoded_nbt <- result.try(nbeet.encode(nbt))
+  let nbt = nbeet.root([#("a", nbeet.byte(127)), #("b", nbeet.byte(127))])
+  use encoded_nbt <- result.try(nbeet.java_encode(nbt, ""))
   should.equal(bit_array.inspect(encoded_nbt), bit_array.inspect(byte_test_nbt))
   Ok(Nil)
 }

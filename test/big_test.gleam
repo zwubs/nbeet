@@ -112,7 +112,7 @@ fn big_test_decoder() {
 pub fn big_test() {
   let assert Ok(nbt) =
     simplifile.read_bits("test/nbt/big_test/uncompressed.nbt")
-  let #(_, big_test) = should.be_ok(nbeet.decode(nbt, big_test_decoder()))
+  let #(_, big_test) = should.be_ok(nbeet.java_decode(nbt, big_test_decoder()))
 
   should.equal(big_test.byte_test, 127)
   should.equal(big_test.short_test, 32_767)
