@@ -3,32 +3,47 @@ import gleam/bit_array
 import gleam/dict.{type Dict}
 import gleam/dynamic.{type Dynamic, from}
 import gleam/list
+import gleam/pair
 import gleam/result
 import nbeet/internal/type_id as type_ids
 
 type DecoderResult =
   Result(#(Dynamic, BitArray), Nil)
 
-pub fn decode(bit_array: BitArray, decoder: decode.Decoder(t)) {
+pub fn java_decode(bit_array: BitArray, decoder: decode.Decoder(t)) {
   use #(root_name, dynamic_value) <- result.then(
-    decode_root_compound(bit_array)
+    decode_named_root_compound(bit_array)
     |> result.replace_error([]),
   )
   use decoded_value <- result.try(decode.from(decoder, dynamic_value))
   Ok(#(root_name, decoded_value))
 }
 
+pub fn java_network_decode(bit_array: BitArray, decoder: decode.Decoder(t)) {
+  use dynamic_value <- result.then(
+    decode_root_compound(bit_array)
+    |> result.replace_error([]),
+  )
+  use decoded_value <- result.try(decode.from(decoder, dynamic_value))
+  Ok(decoded_value)
+}
+
+fn decode_named_root_compound(bit_array: BitArray) {
+  case bit_array {
+    <<type_id:int, bit_array:bits>> if type_id == type_ids.compound -> {
+      use #(name, bit_array) <- result.try(decode_string(bit_array))
+      use compound <- result.try(decode_tag_of_type(bit_array, type_id))
+      Ok(#(name, pair.first(compound)))
+    }
+    _ -> Error(Nil)
+  }
+}
+
 fn decode_root_compound(bit_array: BitArray) {
   case bit_array {
-    <<type_id:int, bit_array:bits>> -> {
-      case type_id {
-        type_id if type_id == type_ids.compound -> {
-          use #(name, bit_array) <- result.try(decode_string(bit_array))
-          use compound <- result.try(decode_tag_of_type(bit_array, type_id))
-          Ok(#(name, compound.0))
-        }
-        _ -> Error(Nil)
-      }
+    <<type_id:int, bit_array:bits>> if type_id == type_ids.compound -> {
+      use result <- result.try(decode_tag_of_type(bit_array, type_id))
+      Ok(pair.first(result))
     }
     _ -> Error(Nil)
   }

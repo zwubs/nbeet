@@ -70,6 +70,10 @@ pub fn java_network_encode(nbt: Nbt) {
   encoder.encode(nbt.tag, None)
 }
 
-pub fn decode(bit_array: BitArray, decoder: decode.Decoder(t)) {
-  decoder.decode(bit_array, decoder)
+pub fn java_decode(bit_array: BitArray, decoder: decode.Decoder(t)) {
+  decoder.java_decode(bit_array, decoder)
+}
+
+pub fn java_network_decode(bit_array: BitArray, decoder: decode.Decoder(t)) {
+  decoder.java_network_decode(bit_array, decoder)
 }
