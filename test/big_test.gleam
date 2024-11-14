@@ -1,4 +1,4 @@
-import decode
+import decode/zero
 import gleam/float
 import gleam/iterator
 import gleeunit/should
@@ -10,13 +10,9 @@ pub type NestedCompound {
 }
 
 fn nested_compound_decoder() {
-  decode.into({
-    use name <- decode.parameter
-    use value <- decode.parameter
-    NestedCompound(name, value)
-  })
-  |> decode.field("name", decode.string)
-  |> decode.field("value", decode.float)
+  use name <- zero.field("name", zero.string)
+  use value <- zero.field("value", zero.float)
+  zero.success(NestedCompound(name, value))
 }
 
 pub type NestedCompounds {
@@ -24,13 +20,9 @@ pub type NestedCompounds {
 }
 
 fn nested_compounds_decoder() {
-  decode.into({
-    use egg <- decode.parameter
-    use ham <- decode.parameter
-    NestedCompounds(egg, ham)
-  })
-  |> decode.field("egg", nested_compound_decoder())
-  |> decode.field("ham", nested_compound_decoder())
+  use egg <- zero.field("egg", nested_compound_decoder())
+  use ham <- zero.field("ham", nested_compound_decoder())
+  zero.success(NestedCompounds(egg, ham))
 }
 
 pub type CompoundListItem {
@@ -38,13 +30,9 @@ pub type CompoundListItem {
 }
 
 fn compound_list_item_decoder() {
-  decode.into({
-    use created_on <- decode.parameter
-    use name <- decode.parameter
-    CompoundListItem(created_on, name)
-  })
-  |> decode.field("created-on", decode.int)
-  |> decode.field("name", decode.string)
+  use created_on <- zero.field("created-on", zero.int)
+  use name <- zero.field("name", zero.string)
+  zero.success(CompoundListItem(created_on, name))
 }
 
 pub type BigTest {
@@ -64,49 +52,39 @@ pub type BigTest {
 }
 
 fn big_test_decoder() {
-  decode.into({
-    use byte_test <- decode.parameter
-    use short_test <- decode.parameter
-    use int_test <- decode.parameter
-    use long_test <- decode.parameter
-    use float_test <- decode.parameter
-    use double_test <- decode.parameter
-    use byte_array_test <- decode.parameter
-    use string_test <- decode.parameter
-    use list_test <- decode.parameter
-    use compound_list_test <- decode.parameter
-    use nested_compound_test <- decode.parameter
-    BigTest(
-      byte_test,
-      short_test,
-      int_test,
-      long_test,
-      float_test,
-      double_test,
-      byte_array_test,
-      string_test,
-      list_test,
-      compound_list_test,
-      nested_compound_test,
-    )
-  })
-  |> decode.field("byteTest", decode.int)
-  |> decode.field("shortTest", decode.int)
-  |> decode.field("intTest", decode.int)
-  |> decode.field("longTest", decode.int)
-  |> decode.field("floatTest", decode.float)
-  |> decode.field("doubleTest", decode.float)
-  |> decode.field(
+  use byte_test <- zero.field("byteTest", zero.int)
+  use short_test <- zero.field("shortTest", zero.int)
+  use int_test <- zero.field("intTest", zero.int)
+  use long_test <- zero.field("longTest", zero.int)
+  use float_test <- zero.field("floatTest", zero.float)
+  use double_test <- zero.field("doubleTest", zero.float)
+  use byte_array_test <- zero.field(
     "byteArrayTest (the first 1000 values of (n*n*255+n*7)%100, starting with n=0 (0, 62, 34, 16, 8, ...))",
-    decode.bit_array,
+    zero.bit_array,
   )
-  |> decode.field("stringTest", decode.string)
-  |> decode.field("listTest (long)", decode.list(decode.int))
-  |> decode.field(
+  use string_test <- zero.field("stringTest", zero.string)
+  use list_test <- zero.field("listTest (long)", zero.list(zero.int))
+  use compound_list_test <- zero.field(
     "listTest (compound)",
-    decode.list(compound_list_item_decoder()),
+    zero.list(compound_list_item_decoder()),
   )
-  |> decode.field("nested compound test", nested_compounds_decoder())
+  use nested_compound_test <- zero.field(
+    "nested compound test",
+    nested_compounds_decoder(),
+  )
+  zero.success(BigTest(
+    byte_test,
+    short_test,
+    int_test,
+    long_test,
+    float_test,
+    double_test,
+    byte_array_test,
+    string_test,
+    list_test,
+    compound_list_test,
+    nested_compound_test,
+  ))
 }
 
 pub fn big_test() {
