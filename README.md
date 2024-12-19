@@ -39,7 +39,7 @@ pub fn encode_truth() -> Result(BitArray, Nil) {
 
 ### Decoding
 ```gleam
-import gleam/dynamic
+import decode/zero
 import gleam/result
 import nbeet
 
@@ -47,16 +47,15 @@ pub type InBeetWe {
   InBeetWe(trust: Int, must: String)
 }
 
+fn truth_decoder() {
+  use trust <- zero.field("trust", zero.int)
+  use must <- zero.field("must", zero.string)
+  zero.success(InBeetWe(trust, must))
+}
+
 fn decode_truth(nbt: BitArray) -> Result(InBeetWe, Nil) {
-  let decoder =
-    decode.into({
-      use trust <- decode.parameter
-      use must <- decode.parameter
-      InBeetWe(trust, must)
-    })
-    |> decode.field("trust", decode.int)
-    |> decode.field("must", decode.string)
-  use #(name, in_beet_we) <- result.try(nbeet.java_decode(nbt, decoder))
+  let decoder = truth_decoder()
+  use #(_, in_beet_we) <- result.try(nbeet.java_decode(nbt, decoder))
   Ok(in_beet_we)
 }
 ```
