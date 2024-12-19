@@ -39,6 +39,7 @@ pub fn encode_truth() -> Result(BitArray, Nil) {
 
 ### Decoding
 ```gleam
+import decode/zero
 import gleam/result
 import nbeet
 
