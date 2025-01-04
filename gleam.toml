@@ -1,5 +1,5 @@
 name = "nbeet"
-version = "0.3.0"
+version = "0.3.1"
 
 description = "An NBT encoder and decoder for gleam"
 licences = ["Apache-2.0"]
