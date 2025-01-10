@@ -1,7 +1,7 @@
-import decode/zero
 import gleam/bit_array
 import gleam/dict.{type Dict}
 import gleam/dynamic.{type Dynamic, from}
+import gleam/dynamic/decode
 import gleam/list
 import gleam/pair
 import gleam/result
@@ -10,21 +10,21 @@ import nbeet/internal/type_id as type_ids
 type DecoderResult =
   Result(#(Dynamic, BitArray), Nil)
 
-pub fn java_decode(bit_array: BitArray, decoder: zero.Decoder(t)) {
+pub fn java_decode(bit_array: BitArray, decoder: decode.Decoder(t)) {
   use #(root_name, dynamic_value) <- result.then(
     decode_named_root_compound(bit_array)
     |> result.replace_error([]),
   )
-  use decoded_value <- result.try(zero.run(dynamic_value, decoder))
+  use decoded_value <- result.try(decode.run(dynamic_value, decoder))
   Ok(#(root_name, decoded_value))
 }
 
-pub fn java_network_decode(bit_array: BitArray, decoder: zero.Decoder(t)) {
+pub fn java_network_decode(bit_array: BitArray, decoder: decode.Decoder(t)) {
   use dynamic_value <- result.then(
     decode_root_compound(bit_array)
     |> result.replace_error([]),
   )
-  use decoded_value <- result.try(zero.run(dynamic_value, decoder))
+  use decoded_value <- result.try(decode.run(dynamic_value, decoder))
   Ok(decoded_value)
 }
 

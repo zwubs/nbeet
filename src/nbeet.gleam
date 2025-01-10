@@ -1,5 +1,5 @@
-import decode/zero
 import gleam/dict
+import gleam/dynamic/decode
 import gleam/list
 import gleam/option.{None, Some}
 import nbeet/internal/decoder
@@ -70,10 +70,10 @@ pub fn java_network_encode(nbt: Nbt) {
   encoder.encode(nbt.tag, None)
 }
 
-pub fn java_decode(bit_array: BitArray, decoder: zero.Decoder(t)) {
+pub fn java_decode(bit_array: BitArray, decoder: decode.Decoder(t)) {
   decoder.java_decode(bit_array, decoder)
 }
 
-pub fn java_network_decode(bit_array: BitArray, decoder: zero.Decoder(t)) {
+pub fn java_network_decode(bit_array: BitArray, decoder: decode.Decoder(t)) {
   decoder.java_network_decode(bit_array, decoder)
 }
