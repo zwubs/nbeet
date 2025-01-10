@@ -1,5 +1,5 @@
 import gleam/bit_array
-import gleam/bytes_builder
+import gleam/bytes_tree
 import gleam/dict.{type Dict}
 import gleam/list
 import gleam/option.{type Option, None, Some}
@@ -94,18 +94,18 @@ fn encode_compound(compound: Dict(String, Tag)) {
   compound
   |> dict.to_list
   |> list.sort(fn(a, b) { string.compare(a.0, b.0) })
-  |> list.fold(bytes_builder.new(), fn(builder, element) {
+  |> list.fold(bytes_tree.new(), fn(builder, element) {
     let #(name, tag) = element
     let type_id = type_id.from_tag(tag)
     let name = encode_string(name)
     let encoded_tag = encode_tag(tag)
     builder
-    |> bytes_builder.append(<<type_id:int>>)
-    |> bytes_builder.append(name)
-    |> bytes_builder.append(encoded_tag)
+    |> bytes_tree.append(<<type_id:int>>)
+    |> bytes_tree.append(name)
+    |> bytes_tree.append(encoded_tag)
   })
-  |> bytes_builder.append(<<type_id.end:int>>)
-  |> bytes_builder.to_bit_array
+  |> bytes_tree.append(<<type_id.end:int>>)
+  |> bytes_tree.to_bit_array
 }
 
 fn encode_int_array(int_array: List(Int)) {
