@@ -1,6 +1,6 @@
 import decode/zero
 import gleam/float
-import gleam/iterator
+import gleam/list
 import gleeunit/should
 import nbeet
 import simplifile
@@ -103,9 +103,9 @@ pub fn big_test() {
   ))
   should.equal(big_test.double_test, 0.4931287132182315)
   let expected_byte_array =
-    iterator.range(from: 0, to: 999)
-    |> iterator.map(fn(i) { { i * i * 255 + i * 7 } % 100 })
-    |> iterator.fold(<<>>, fn(bit_array, int) { <<bit_array:bits, int:int>> })
+    list.range(from: 0, to: 999)
+    |> list.map(fn(i) { { i * i * 255 + i * 7 } % 100 })
+    |> list.fold(<<>>, fn(bit_array, int) { <<bit_array:bits, int:int>> })
   should.equal(big_test.byte_array_test, expected_byte_array)
   should.equal(big_test.list_test, [11, 12, 13, 14, 15])
   let expected_compound_list = [
