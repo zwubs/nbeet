@@ -1,5 +1,5 @@
-import decode/zero
 import gleam/dict
+import gleam/dynamic/decode
 import gleeunit/should
 import nbeet
 import simplifile
@@ -9,11 +9,11 @@ pub type IntegerTest {
 }
 
 fn integer_test_decoder(field_prefix: String) {
-  use value <- zero.field(field_prefix, zero.int)
-  use zero <- zero.field(field_prefix <> "_zero", zero.int)
-  use min <- zero.field(field_prefix <> "_min", zero.int)
-  use max <- zero.field(field_prefix <> "_max", zero.int)
-  zero.success(IntegerTest(value, zero, min, max))
+  use value <- decode.field(field_prefix, decode.int)
+  use zero <- decode.field(field_prefix <> "_zero", decode.int)
+  use min <- decode.field(field_prefix <> "_min", decode.int)
+  use max <- decode.field(field_prefix <> "_max", decode.int)
+  decode.success(IntegerTest(value, zero, min, max))
 }
 
 pub fn updated_decode_byte_test() {
@@ -67,12 +67,15 @@ pub type DecimalTest {
 }
 
 fn decimal_test_decoder(field_prefix: String) {
-  use value <- zero.field(field_prefix, zero.float)
-  use zero <- zero.field(field_prefix <> "_zero", zero.float)
-  use min <- zero.field(field_prefix <> "_min", zero.float)
-  use max <- zero.field(field_prefix <> "_max", zero.float)
-  use infinitesimal <- zero.field(field_prefix <> "_infinitesimal", zero.float)
-  zero.success(DecimalTest(value, zero, min, max, infinitesimal))
+  use value <- decode.field(field_prefix, decode.float)
+  use zero <- decode.field(field_prefix <> "_zero", decode.float)
+  use min <- decode.field(field_prefix <> "_min", decode.float)
+  use max <- decode.field(field_prefix <> "_max", decode.float)
+  use infinitesimal <- decode.field(
+    field_prefix <> "_infinitesimal",
+    decode.float,
+  )
+  decode.success(DecimalTest(value, zero, min, max, infinitesimal))
 }
 
 pub fn decode_float_test() {
@@ -102,11 +105,11 @@ pub type ByteArrayTest {
 }
 
 fn byte_array_test_decoder() {
-  use value <- zero.field("byte_array", zero.bit_array)
-  use empty <- zero.field("byte_array_empty", zero.bit_array)
-  use min <- zero.field("byte_array_min", zero.bit_array)
-  use max <- zero.field("byte_array_max", zero.bit_array)
-  zero.success(ByteArrayTest(value, empty, min, max))
+  use value <- decode.field("byte_array", decode.bit_array)
+  use empty <- decode.field("byte_array_empty", decode.bit_array)
+  use min <- decode.field("byte_array_min", decode.bit_array)
+  use max <- decode.field("byte_array_max", decode.bit_array)
+  decode.success(ByteArrayTest(value, empty, min, max))
 }
 
 pub fn decode_byte_array_test() {
@@ -124,10 +127,10 @@ pub type StringTest {
 }
 
 fn string_test_decoder() {
-  use value <- zero.field("string", zero.string)
-  use empty <- zero.field("string_empty", zero.string)
-  use emoji <- zero.field("string_emoji", zero.string)
-  zero.success(StringTest(value, empty, emoji))
+  use value <- decode.field("string", decode.string)
+  use empty <- decode.field("string_empty", decode.string)
+  use emoji <- decode.field("string_emoji", decode.string)
+  decode.success(StringTest(value, empty, emoji))
 }
 
 pub fn decode_string_test() {
@@ -150,12 +153,18 @@ pub type ListTest {
 }
 
 fn list_test_decoder() {
-  use value <- zero.field("list", zero.list(zero.int))
-  use empty <- zero.field("list_empty", zero.list(zero.int))
-  use empty_end <- zero.field("list_empty_end", zero.list(zero.int))
-  use empty_negative <- zero.field("list_empty_negative", zero.list(zero.int))
-  use nested <- zero.field("list_nested", zero.list(zero.list(zero.string)))
-  zero.success(ListTest(value, empty, empty_end, empty_negative, nested))
+  use value <- decode.field("list", decode.list(decode.int))
+  use empty <- decode.field("list_empty", decode.list(decode.int))
+  use empty_end <- decode.field("list_empty_end", decode.list(decode.int))
+  use empty_negative <- decode.field(
+    "list_empty_negative",
+    decode.list(decode.int),
+  )
+  use nested <- decode.field(
+    "list_nested",
+    decode.list(decode.list(decode.string)),
+  )
+  decode.success(ListTest(value, empty, empty_end, empty_negative, nested))
 }
 
 pub fn decode_list_test() {
@@ -176,8 +185,8 @@ pub type ValueCompoundTest {
 }
 
 fn value_compound_test_decoder() {
-  use value <- zero.field("", zero.int)
-  zero.success(ValueCompoundTest(value))
+  use value <- decode.field("", decode.int)
+  decode.success(ValueCompoundTest(value))
 }
 
 pub type NestedCompoundTest {
@@ -185,8 +194,8 @@ pub type NestedCompoundTest {
 }
 
 fn nested_compound_test_decoder() {
-  use nest <- zero.field("nest", zero.string)
-  zero.success(NestedCompoundTest(nest))
+  use nest <- decode.field("nest", decode.string)
+  decode.success(NestedCompoundTest(nest))
 }
 
 pub type NesterCompoundTest {
@@ -194,11 +203,11 @@ pub type NesterCompoundTest {
 }
 
 fn nester_compound_test_decoder() {
-  use compound_nested <- zero.field(
+  use compound_nested <- decode.field(
     "compound_nested",
     nested_compound_test_decoder(),
   )
-  zero.success(NesterCompoundTest(compound_nested))
+  decode.success(NesterCompoundTest(compound_nested))
 }
 
 pub type CompoundTest {
@@ -210,16 +219,16 @@ pub type CompoundTest {
 }
 
 fn compound_test_decoder() {
-  use compound <- zero.field("compound", value_compound_test_decoder())
-  use compound_empty <- zero.field(
+  use compound <- decode.field("compound", value_compound_test_decoder())
+  use compound_empty <- decode.field(
     "compound_empty",
-    zero.dict(zero.string, zero.int),
+    decode.dict(decode.string, decode.int),
   )
-  use compound_nester <- zero.field(
+  use compound_nester <- decode.field(
     "compound_nester",
     nester_compound_test_decoder(),
   )
-  zero.success(CompoundTest(compound, compound_empty, compound_nester))
+  decode.success(CompoundTest(compound, compound_empty, compound_nester))
 }
 
 pub fn decode_compound_test() {
@@ -236,9 +245,12 @@ pub type ArrayTest {
 }
 
 fn array_test_decoder(field_prefix: String) {
-  use array <- zero.field(field_prefix <> "_array", zero.list(zero.int))
-  use empty <- zero.field(field_prefix <> "_array_empty", zero.list(zero.int))
-  zero.success(ArrayTest(array, empty))
+  use array <- decode.field(field_prefix <> "_array", decode.list(decode.int))
+  use empty <- decode.field(
+    field_prefix <> "_array_empty",
+    decode.list(decode.int),
+  )
+  decode.success(ArrayTest(array, empty))
 }
 
 pub fn decode_int_array_test() {
