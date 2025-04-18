@@ -1,6 +1,6 @@
 import gleam/bit_array
 import gleam/bytes_tree
-import gleam/dict.{type Dict}
+import gleam/dict
 import gleam/list
 import gleam/option.{type Option, None, Some}
 import gleam/string
@@ -88,12 +88,10 @@ fn encode_list(list: List(Tag)) {
   }
 }
 
-// Implements sorting to make unit testing viable since
-// the order of elements in a dict is not garunteed.
-fn encode_compound(compound: Dict(String, Tag)) {
+fn encode_compound(compound: List(#(String, Tag))) {
   compound
+  |> dict.from_list
   |> dict.to_list
-  |> list.sort(fn(a, b) { string.compare(a.0, b.0) })
   |> list.fold(bytes_tree.new(), fn(builder, element) {
     let #(name, tag) = element
     let type_id = type_id.from_tag(tag)

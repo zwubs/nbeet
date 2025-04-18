@@ -1,4 +1,3 @@
-import gleam/dict
 import gleam/dynamic/decode
 import gleam/list
 import gleam/option.{None, Some}
@@ -51,7 +50,7 @@ pub fn list(tag: fn(value) -> Tag, list: List(value)) {
 }
 
 pub fn compound(compound: List(#(String, Tag))) -> Tag {
-  tag.Compound(dict.from_list(compound))
+  tag.Compound(compound)
 }
 
 pub fn int_array(int_array: List(Int)) -> Tag {

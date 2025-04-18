@@ -1,5 +1,3 @@
-import gleam/dict.{type Dict}
-
 pub type Tag {
   End
   Byte(Int)
@@ -11,7 +9,7 @@ pub type Tag {
   ByteArray(BitArray)
   String(String)
   List(List(Tag))
-  Compound(Dict(String, Tag))
+  Compound(List(#(String, Tag)))
   IntArray(List(Int))
   LongArray(List(Int))
 }
