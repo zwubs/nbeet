@@ -9,6 +9,8 @@ pub opaque type Nbt {
   Nbt(tag: Tag)
 }
 
+pub const empty = Nbt(tag.Compound([]))
+
 pub fn root(root: List(#(String, Tag))) {
   Nbt(compound(root))
 }
