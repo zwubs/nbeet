@@ -82,7 +82,7 @@ fn encode_list(list: List(Tag)) {
         list.fold(list, <<>>, fn(bit_array, tag) {
           bit_array.append(bit_array, encode_tag(tag))
         })
-      <<type_id:int, length:size(32), encoded_tags:bits, type_id.end:int>>
+      <<type_id:int, length:size(32), encoded_tags:bits>>
     }
     _ -> <<type_id.end:int, 0:size(32)>>
   }
