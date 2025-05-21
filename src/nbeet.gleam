@@ -3,11 +3,14 @@ import gleam/list
 import gleam/option.{None, Some}
 import nbeet/internal/decoder
 import nbeet/internal/encoder
-import nbeet/internal/tag.{type Tag}
+import nbeet/internal/tag
 
 pub opaque type Nbt {
   Nbt(tag: Tag)
 }
+
+pub type Tag =
+  tag.Tag
 
 pub const empty = Nbt(tag.Compound([]))
 
