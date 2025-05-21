@@ -3,7 +3,7 @@ import gleam/bytes_tree
 import gleam/dict
 import gleam/list
 import gleam/option.{type Option, None, Some}
-import gleam/string
+import nbeet/internal/mutf8
 import nbeet/internal/tag.{type Tag}
 import nbeet/internal/type_id
 
@@ -69,8 +69,9 @@ fn encode_byte_array(byte_array: BitArray) {
 }
 
 fn encode_string(string: String) {
-  let length = string.length(string)
-  <<length:int-big-size(16), string:utf8>>
+  let bytes = mutf8.bitarray_from_string(string)
+  let length = bit_array.byte_size(bytes)
+  <<length:int-big-size(16), bytes:bits>>
 }
 
 fn encode_list(list: List(Tag)) {

@@ -1,10 +1,10 @@
-import gleam/bit_array
 import gleam/dict.{type Dict}
 import gleam/dynamic.{type Dynamic, from}
 import gleam/dynamic/decode
 import gleam/list
 import gleam/pair
 import gleam/result
+import nbeet/internal/mutf8
 import nbeet/internal/type_id as type_ids
 
 type DecoderResult =
@@ -142,8 +142,7 @@ fn decode_string(bit_array: BitArray) {
 }
 
 fn string_from_bytes(bit_array: BitArray) {
-  bit_array.to_string(bit_array)
-  |> result.replace_error(Nil)
+  mutf8.string_from_bitarray(bit_array) |> result.replace_error(Nil)
 }
 
 fn decode_list(bit_array: BitArray) {
