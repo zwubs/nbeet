@@ -225,9 +225,9 @@ fn decode_list_of_length(
   list: List(Dynamic),
   length: Int,
 ) -> Result(#(List(Dynamic), BitArray), Nil) {
-  case length {
-    l if l < 1 -> Ok(#(list, bit_array))
-    _ -> {
+  case length < 1 {
+    True -> Ok(#(list, bit_array))
+    False -> {
       use #(element, bit_array) <- result.try(decode_tag_of_type(
         bit_array,
         type_id,
@@ -253,9 +253,9 @@ fn decode_compound_elements(
   dict: Dict(String, Dynamic),
 ) -> Result(#(Dict(String, Dynamic), BitArray), Nil) {
   use #(type_id, bit_array) <- result.try(decode_byte(bit_array))
-  case type_id {
-    _ if type_id == type_ids.end -> Ok(#(dict, bit_array))
-    _ -> {
+  case type_id == type_ids.end {
+    True -> Ok(#(dict, bit_array))
+    False -> {
       use #(name, bit_array) <- result.try(decode_string(bit_array))
       use #(value, bit_array) <- result.try(decode_tag_of_type(
         bit_array,
