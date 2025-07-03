@@ -81,5 +81,3 @@ pub fn java_decode(bit_array: BitArray, decoder: decode.Decoder(t)) {
 pub fn java_network_decode(bit_array: BitArray, decoder: decode.Decoder(t)) {
   decoder.java_network_decode(bit_array, decoder)
 }
-
-
