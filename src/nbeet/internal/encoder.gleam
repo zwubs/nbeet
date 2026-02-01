@@ -1,26 +1,29 @@
 import gleam/bit_array
 import gleam/dict
 import gleam/list
-import gleam/option
 import nbeet/internal/mutf8
 import nbeet/internal/tag.{type Tag}
 import nbeet/internal/tag_type
 
-pub fn encode(root_tag: Tag, root_name: option.Option(String)) {
-  case root_tag {
-    tag.Compound(compound) -> {
-      bit_array.append(<<>>, encode_tag_type(tag_type.Compound))
-      |> bit_array.append(
-        root_name |> option.map(encode_string) |> option.unwrap(<<>>),
-      )
-      |> bit_array.append(encode_compound(compound))
-      |> Ok
-    }
-    _ -> Error(Nil)
-  }
+pub fn java_network_encode(tag: Tag) {
+  let assert tag.Compound(compound) = tag
+  bit_array.append(<<>>, encode_tag_type(tag_type.Compound))
+  |> bit_array.append(encode_compound(compound))
 }
 
-fn encode_tag(tag: Tag) {
+pub fn java_encode(tag: Tag, root_name: String) {
+  let assert tag.Compound(compound) = tag
+  bit_array.append(<<>>, encode_tag_type(tag_type.Compound))
+  |> bit_array.append(encode_string(root_name))
+  |> bit_array.append(encode_compound(compound))
+}
+
+pub fn encode_tag_with_type(tag: Tag) {
+  bit_array.append(<<>>, encode_tag_type(tag.to_tag_type(tag)))
+  |> bit_array.append(encode_tag(tag))
+}
+
+pub fn encode_tag(tag: Tag) {
   case tag {
     tag.End -> <<>>
     tag.Byte(byte) -> encode_byte(byte)

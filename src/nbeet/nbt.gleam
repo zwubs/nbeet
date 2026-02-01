@@ -1,6 +1,5 @@
 import gleam/dynamic/decode
 import gleam/list
-import gleam/option.{None, Some}
 import nbeet/internal/decoder
 import nbeet/internal/encoder
 import nbeet/internal/tag
@@ -12,10 +11,17 @@ pub opaque type Nbt {
 pub type Tag =
   tag.Tag
 
-pub const empty = Nbt(tag.Compound([]))
+pub const empty = tag.Compound([])
 
 pub fn root(root: List(#(String, Tag))) {
   Nbt(compound(root))
+}
+
+pub fn bool(bool: Bool) -> Tag {
+  case bool {
+    False -> byte(0)
+    True -> byte(1)
+  }
 }
 
 pub fn byte(byte: Int) -> Tag {
@@ -66,12 +72,20 @@ pub fn long_array(long_array: List(Int)) -> Tag {
   tag.LongArray(long_array)
 }
 
+pub fn encode_tag(tag: tag.Tag) {
+  encoder.encode_tag_with_type(tag)
+}
+
 pub fn java_encode(nbt: Nbt, root_name: String) {
-  encoder.encode(nbt.tag, Some(root_name))
+  encoder.java_encode(nbt.tag, root_name)
 }
 
 pub fn java_network_encode(nbt: Nbt) {
-  encoder.encode(nbt.tag, None)
+  encoder.java_network_encode(nbt.tag)
+}
+
+pub fn decode_tag(bit_array: BitArray, decoder: decode.Decoder(t)) {
+  decoder.decode_tag(bit_array, decoder)
 }
 
 pub fn java_decode(bit_array: BitArray, decoder: decode.Decoder(t)) {

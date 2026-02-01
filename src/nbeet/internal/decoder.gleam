@@ -30,8 +30,7 @@ pub fn java_network_decode(
     decode_root_compound(bit_array)
     |> result.replace_error([]),
   )
-  use decoded_value <- result.try(decode.run(dynamic_value, decoder))
-  Ok(decoded_value)
+  decode.run(dynamic_value, decoder)
 }
 
 fn decode_named_root_compound(
@@ -41,7 +40,7 @@ fn decode_named_root_compound(
   case tag_type {
     tag_type.Compound -> {
       use #(name, bit_array) <- result.try(decode_string(bit_array))
-      use compound <- result.try(decode_tag(bit_array, tag_type))
+      use compound <- result.try(decode_tag_of_type(bit_array, tag_type))
       Ok(#(name, pair.first(compound)))
     }
     _ -> Error(Nil)
@@ -52,11 +51,24 @@ fn decode_root_compound(bit_array: BitArray) -> Result(Dynamic, Nil) {
   use #(tag_type, bit_array) <- result.try(decode_tag_type(bit_array))
   case tag_type {
     tag_type.Compound -> {
-      use result <- result.try(decode_tag(bit_array, tag_type))
+      use result <- result.try(decode_tag_of_type(bit_array, tag_type))
       Ok(pair.first(result))
     }
     _ -> Error(Nil)
   }
+}
+
+pub fn decode_tag(
+  bit_array: BitArray,
+  decoder: decode.Decoder(t),
+) -> Result(t, List(decode.DecodeError)) {
+  use #(tag_type, bit_array) <- result.try(
+    decode_tag_type(bit_array) |> result.replace_error([]),
+  )
+  use #(dynamic_value, _) <- result.try(
+    decode_tag_of_type(bit_array, tag_type) |> result.replace_error([]),
+  )
+  decode.run(dynamic_value, decoder)
 }
 
 fn decode_tag_type(
@@ -67,7 +79,7 @@ fn decode_tag_type(
   Ok(#(tag_type, bit_array))
 }
 
-fn decode_tag(
+fn decode_tag_of_type(
   bit_array: BitArray,
   tag_type: tag_type.TagType,
 ) -> DecoderResult(Dynamic) {
@@ -180,7 +192,10 @@ fn decode_list_of_length(
   case length < 1 {
     True -> Ok(#(list, bit_array))
     False -> {
-      use #(element, bit_array) <- result.try(decode_tag(bit_array, tag_type))
+      use #(element, bit_array) <- result.try(decode_tag_of_type(
+        bit_array,
+        tag_type,
+      ))
       decode_list_of_length(
         bit_array,
         tag_type,
@@ -207,7 +222,10 @@ fn decode_compound_elements(
     tag_type.End -> Ok(#(dict, bit_array))
     _ -> {
       use #(name, bit_array) <- result.try(decode_string(bit_array))
-      use #(value, bit_array) <- result.try(decode_tag(bit_array, tag_type))
+      use #(value, bit_array) <- result.try(decode_tag_of_type(
+        bit_array,
+        tag_type,
+      ))
       decode_compound_elements(
         bit_array,
         dict.insert(dict, dynamic.string(name), value),

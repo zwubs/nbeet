@@ -1,7 +1,6 @@
 import gleam/dict
 import gleam/dynamic/decode
-import gleeunit/should
-import nbeet
+import nbeet/nbt
 import simplifile
 
 pub type IntegerTest {
@@ -19,41 +18,41 @@ fn integer_test_decoder(field_prefix: String) {
 pub fn updated_decode_byte_test() {
   let assert Ok(nbt) = simplifile.read_bits("test/nbt/byte_test.nbt")
   let decoder = integer_test_decoder("byte")
-  let #(_, byte_test) = should.be_ok(nbeet.java_decode(nbt, decoder))
-  should.equal(byte_test.value, 42)
-  should.equal(byte_test.zero, 0)
-  should.equal(byte_test.min, -128)
-  should.equal(byte_test.max, 127)
+  let assert Ok(#(_, byte_test)) = nbt.java_decode(nbt, decoder)
+  assert byte_test.value == 42
+  assert byte_test.zero == 0
+  assert byte_test.min == -128
+  assert byte_test.max == 127
 }
 
 pub fn decode_short_test() {
   let assert Ok(nbt) = simplifile.read_bits("test/nbt/short_test.nbt")
   let decoder = integer_test_decoder("short")
-  let #(_, short_test) = should.be_ok(nbeet.java_decode(nbt, decoder))
-  should.equal(short_test.value, 42)
-  should.equal(short_test.zero, 0)
-  should.equal(short_test.min, -32_768)
-  should.equal(short_test.max, 32_767)
+  let assert Ok(#(_, short_test)) = nbt.java_decode(nbt, decoder)
+  assert short_test.value == 42
+  assert short_test.zero == 0
+  assert short_test.min == -32_768
+  assert short_test.max == 32_767
 }
 
 pub fn decode_int_test() {
   let assert Ok(nbt) = simplifile.read_bits("test/nbt/int_test.nbt")
   let decoder = integer_test_decoder("int")
-  let #(_, int_test) = should.be_ok(nbeet.java_decode(nbt, decoder))
-  should.equal(int_test.value, 42)
-  should.equal(int_test.zero, 0)
-  should.equal(int_test.min, -2_147_483_648)
-  should.equal(int_test.max, 2_147_483_647)
+  let assert Ok(#(_, int_test)) = nbt.java_decode(nbt, decoder)
+  assert int_test.value == 42
+  assert int_test.zero == 0
+  assert int_test.min == -2_147_483_648
+  assert int_test.max == 2_147_483_647
 }
 
 pub fn decode_long_test() {
   let assert Ok(nbt) = simplifile.read_bits("test/nbt/long_test.nbt")
   let decoder = integer_test_decoder("long")
-  let #(_, long_test) = should.be_ok(nbeet.java_decode(nbt, decoder))
-  should.equal(long_test.value, 42)
-  should.equal(long_test.zero, 0)
-  should.equal(long_test.min, -9_223_372_036_854_775_808)
-  should.equal(long_test.max, 9_223_372_036_854_775_807)
+  let assert Ok(#(_, long_test)) = nbt.java_decode(nbt, decoder)
+  assert long_test.value == 42
+  assert long_test.zero == 0
+  assert long_test.min == -9_223_372_036_854_775_808
+  assert long_test.max == 9_223_372_036_854_775_807
 }
 
 pub type DecimalTest {
@@ -81,23 +80,23 @@ fn decimal_test_decoder(field_prefix: String) {
 pub fn decode_float_test() {
   let assert Ok(nbt) = simplifile.read_bits("test/nbt/float_test.nbt")
   let decoder = decimal_test_decoder("float")
-  let #(_, float_test) = should.be_ok(nbeet.java_decode(nbt, decoder))
-  should.equal(float_test.value, 42.0)
-  should.equal(float_test.zero, 0.0)
-  should.equal(float_test.min, -3.4028234663852886e38)
-  should.equal(float_test.max, 3.4028234663852886e38)
-  should.equal(float_test.infinitesimal, 1.401298464324817e-45)
+  let assert Ok(#(_, float_test)) = nbt.java_decode(nbt, decoder)
+  assert float_test.value == 42.0
+  assert float_test.zero == 0.0
+  assert float_test.min == -3.4028234663852886e38
+  assert float_test.max == 3.4028234663852886e38
+  assert float_test.infinitesimal == 1.401298464324817e-45
 }
 
 pub fn decode_double_test() {
   let assert Ok(nbt) = simplifile.read_bits("test/nbt/double_test.nbt")
   let decoder = decimal_test_decoder("double")
-  let #(_, double_test) = should.be_ok(nbeet.java_decode(nbt, decoder))
-  should.equal(double_test.value, 42.0)
-  should.equal(double_test.zero, 0.0)
-  should.equal(double_test.min, -1.7976931348623157e308)
-  should.equal(double_test.max, 1.7976931348623157e308)
-  should.equal(double_test.infinitesimal, 4.9406564584124654e-324)
+  let assert Ok(#(_, double_test)) = nbt.java_decode(nbt, decoder)
+  assert double_test.value == 42.0
+  assert double_test.zero == 0.0
+  assert double_test.min == -1.7976931348623157e308
+  assert double_test.max == 1.7976931348623157e308
+  assert double_test.infinitesimal == 4.9406564584124654e-324
 }
 
 pub type ByteArrayTest {
@@ -115,11 +114,11 @@ fn byte_array_test_decoder() {
 pub fn decode_byte_array_test() {
   let assert Ok(nbt) = simplifile.read_bits("test/nbt/byte_array_test.nbt")
   let decoder = byte_array_test_decoder()
-  let #(_, byte_array_test) = should.be_ok(nbeet.java_decode(nbt, decoder))
-  should.equal(byte_array_test.value, <<42>>)
-  should.equal(byte_array_test.empty, <<>>)
-  should.equal(byte_array_test.min, <<0>>)
-  should.equal(byte_array_test.max, <<255>>)
+  let assert Ok(#(_, byte_array_test)) = nbt.java_decode(nbt, decoder)
+  assert byte_array_test.value == <<42>>
+  assert byte_array_test.empty == <<>>
+  assert byte_array_test.min == <<0>>
+  assert byte_array_test.max == <<255>>
 }
 
 pub type StringTest {
@@ -136,10 +135,10 @@ fn string_test_decoder() {
 pub fn decode_string_test() {
   let assert Ok(nbt) = simplifile.read_bits("test/nbt/string_test.nbt")
   let decoder = string_test_decoder()
-  let #(_, string_test) = should.be_ok(nbeet.java_decode(nbt, decoder))
-  should.equal(string_test.value, "42")
-  should.equal(string_test.empty, "")
-  should.equal(string_test.emoji, "⭐")
+  let assert Ok(#(_, string_test)) = nbt.java_decode(nbt, decoder)
+  assert string_test.value == "42"
+  assert string_test.empty == ""
+  assert string_test.emoji == "⭐"
 }
 
 pub type ListTest {
@@ -170,14 +169,14 @@ fn list_test_decoder() {
 pub fn decode_list_test() {
   let assert Ok(nbt) = simplifile.read_bits("test/nbt/list_test.nbt")
   let decoder = list_test_decoder()
-  let #(_, list_test) = should.be_ok(nbeet.java_decode(nbt, decoder))
-  should.equal(list_test.value, [42])
-  should.equal(list_test.empty, [])
+  let assert Ok(#(_, list_test)) = nbt.java_decode(nbt, decoder)
+  assert list_test.value == [42]
+  assert list_test.empty == []
   // List with an END type id
-  should.equal(list_test.empty_end, [])
+  assert list_test.empty_end == []
   // List with a negative length
-  should.equal(list_test.empty_negative, [])
-  should.equal(list_test.nested, [["egg"]])
+  assert list_test.empty_negative == []
+  assert list_test.nested == [["egg"]]
 }
 
 pub type ValueCompoundTest {
@@ -234,10 +233,10 @@ fn compound_test_decoder() {
 pub fn decode_compound_test() {
   let assert Ok(nbt) = simplifile.read_bits("test/nbt/compound_test.nbt")
   let decoder = compound_test_decoder()
-  let #(_, compound_test) = should.be_ok(nbeet.java_decode(nbt, decoder))
-  should.equal(compound_test.value.value, 42)
-  should.equal(dict.size(compound_test.empty), 0)
-  should.equal(compound_test.nester.nested.nest, "egg")
+  let assert Ok(#(_, compound_test)) = nbt.java_decode(nbt, decoder)
+  assert compound_test.value.value == 42
+  assert dict.size(compound_test.empty) == 0
+  assert compound_test.nester.nested.nest == "egg"
 }
 
 pub type ArrayTest {
@@ -256,15 +255,15 @@ fn array_test_decoder(field_prefix: String) {
 pub fn decode_int_array_test() {
   let assert Ok(nbt) = simplifile.read_bits("test/nbt/int_array_test.nbt")
   let decoder = array_test_decoder("int")
-  let #(_, int_array_test) = should.be_ok(nbeet.java_decode(nbt, decoder))
-  should.equal(int_array_test.value, [42])
-  should.equal(int_array_test.empty, [])
+  let assert Ok(#(_, int_array_test)) = nbt.java_decode(nbt, decoder)
+  assert int_array_test.value == [42]
+  assert int_array_test.empty == []
 }
 
 pub fn decode_long_array_test() {
   let assert Ok(nbt) = simplifile.read_bits("test/nbt/long_array_test.nbt")
   let decoder = array_test_decoder("long")
-  let #(_, long_array_test) = should.be_ok(nbeet.java_decode(nbt, decoder))
-  should.equal(long_array_test.value, [42])
-  should.equal(long_array_test.empty, [])
+  let assert Ok(#(_, long_array_test)) = nbt.java_decode(nbt, decoder)
+  assert long_array_test.value == [42]
+  assert long_array_test.empty == []
 }
