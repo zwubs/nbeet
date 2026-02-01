@@ -1,21 +1,20 @@
 import gleam/bit_array
-import gleam/bytes_tree
 import gleam/dict
 import gleam/list
-import gleam/option.{type Option, None, Some}
+import gleam/option
 import nbeet/internal/mutf8
 import nbeet/internal/tag.{type Tag}
-import nbeet/internal/type_id
+import nbeet/internal/tag_type
 
-pub fn encode(root_tag: Tag, root_name: Option(String)) {
+pub fn encode(root_tag: Tag, root_name: option.Option(String)) {
   case root_tag {
     tag.Compound(compound) -> {
-      let name = case root_name {
-        Some(name) -> encode_string(name)
-        None -> <<>>
-      }
-      let encoded_compound = encode_compound(compound)
-      Ok(<<type_id.compound:int, name:bits, encoded_compound:bits>>)
+      bit_array.append(<<>>, encode_tag_type(tag_type.Compound))
+      |> bit_array.append(
+        root_name |> option.map(encode_string) |> option.unwrap(<<>>),
+      )
+      |> bit_array.append(encode_compound(compound))
+      |> Ok
     }
     _ -> Error(Nil)
   }
@@ -37,6 +36,10 @@ fn encode_tag(tag: Tag) {
     tag.IntArray(int_array) -> encode_int_array(int_array)
     tag.LongArray(long_array) -> encode_long_array(long_array)
   }
+}
+
+fn encode_tag_type(tag_type: tag_type.TagType) {
+  tag_type |> tag_type.to_int |> encode_byte
 }
 
 fn encode_byte(byte: Int) {
@@ -77,15 +80,15 @@ fn encode_string(string: String) {
 fn encode_list(list: List(Tag)) {
   case list {
     [first_tag, ..] -> {
-      let type_id = type_id.from_tag(first_tag)
-      let length = list.length(list)
-      let encoded_tags =
-        list.fold(list, <<>>, fn(bit_array, tag) {
-          bit_array.append(bit_array, encode_tag(tag))
-        })
-      <<type_id:int, length:size(32), encoded_tags:bits>>
+      bit_array.append(<<>>, encode_tag_type(tag.to_tag_type(first_tag)))
+      |> bit_array.append(encode_int(list.length(list)))
+      |> list.fold(list, _, fn(bit_array, tag) {
+        bit_array.append(bit_array, encode_tag(tag))
+      })
     }
-    _ -> <<type_id.end:int, 0:size(32)>>
+    [] ->
+      bit_array.append(<<>>, encode_tag_type(tag_type.End))
+      |> bit_array.append(encode_int(0))
   }
 }
 
@@ -93,18 +96,13 @@ fn encode_compound(compound: List(#(String, Tag))) {
   compound
   |> dict.from_list
   |> dict.to_list
-  |> list.fold(bytes_tree.new(), fn(builder, element) {
+  |> list.fold(<<>>, fn(bit_array, element) {
     let #(name, tag) = element
-    let type_id = type_id.from_tag(tag)
-    let name = encode_string(name)
-    let encoded_tag = encode_tag(tag)
-    builder
-    |> bytes_tree.append(<<type_id:int>>)
-    |> bytes_tree.append(name)
-    |> bytes_tree.append(encoded_tag)
+    bit_array.append(bit_array, tag |> tag.to_tag_type |> encode_tag_type)
+    |> bit_array.append(encode_string(name))
+    |> bit_array.append(encode_tag(tag))
   })
-  |> bytes_tree.append(<<type_id.end:int>>)
-  |> bytes_tree.to_bit_array
+  |> bit_array.append(encode_tag_type(tag_type.End))
 }
 
 fn encode_int_array(int_array: List(Int)) {
