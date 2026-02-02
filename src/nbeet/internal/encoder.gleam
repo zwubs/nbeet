@@ -1,6 +1,8 @@
 import gleam/bit_array
-import gleam/dict
+import gleam/bool
 import gleam/list
+import gleam/pair
+import gleam/set
 import nbeet/internal/mutf8
 import nbeet/internal/tag.{type Tag}
 import nbeet/internal/tag_type
@@ -96,10 +98,17 @@ fn encode_list(list: List(Tag)) {
 }
 
 fn encode_compound(compound: List(#(String, Tag))) {
-  compound
-  |> dict.from_list
-  |> dict.to_list
-  |> list.fold(<<>>, fn(bit_array, element) {
+  // Avoiding dict to preserve list order for testing
+  let unique_elements =
+    list.fold(compound, #(set.new(), []), fn(folded, element) {
+      let #(names, elements) = folded
+      let #(name, _) = element
+      use <- bool.guard(set.contains(names, name), folded)
+      #(names, [element, ..elements])
+    })
+    |> pair.second()
+
+  list.fold_right(unique_elements, <<>>, fn(bit_array, element) {
     let #(name, tag) = element
     bit_array.append(bit_array, tag |> tag.to_tag_type |> encode_tag_type)
     |> bit_array.append(encode_string(name))

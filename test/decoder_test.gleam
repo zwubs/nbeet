@@ -15,7 +15,7 @@ fn integer_test_decoder(field_prefix: String) {
   decode.success(IntegerTest(value, zero, min, max))
 }
 
-pub fn updated_decode_byte_test() {
+pub fn decode_byte_test() {
   let assert Ok(nbt) = simplifile.read_bits("test/nbt/byte_test.nbt")
   let decoder = integer_test_decoder("byte")
   let assert Ok(#(_, byte_test)) = nbt.java_decode(nbt, decoder)
@@ -167,7 +167,7 @@ fn list_test_decoder() {
 }
 
 pub fn decode_list_test() {
-  let assert Ok(nbt) = simplifile.read_bits("test/nbt/list_test.nbt")
+  let assert Ok(nbt) = simplifile.read_bits("test/nbt/list_decode_test.nbt")
   let decoder = list_test_decoder()
   let assert Ok(#(_, list_test)) = nbt.java_decode(nbt, decoder)
   assert list_test.value == [42]
