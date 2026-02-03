@@ -4,38 +4,44 @@ import gleam/dynamic/decode
 import gleam/list
 import gleam/pair
 import gleam/result
+import nbeet/error as public_error
+import nbeet/internal/error
 import nbeet/internal/mutf8
 import nbeet/internal/tag_type
 
 type DecoderResult(value) =
-  Result(#(value, BitArray), Nil)
+  Result(#(value, BitArray), error.InternalError)
 
 pub fn java_decode(
   bit_array: BitArray,
   decoder: decode.Decoder(t),
-) -> Result(#(String, t), List(decode.DecodeError)) {
+) -> Result(#(String, t), public_error.Error) {
   use #(root_name, dynamic_value) <- result.try(
     decode_named_root_compound(bit_array)
-    |> result.replace_error([]),
+    |> result.map_error(error.to_public_error(_, bit_array)),
   )
-  use decoded_value <- result.try(decode.run(dynamic_value, decoder))
+  use decoded_value <- result.try(
+    decode.run(dynamic_value, decoder)
+    |> result.map_error(public_error.DecodeErrors),
+  )
   Ok(#(root_name, decoded_value))
 }
 
 pub fn java_network_decode(
   bit_array: BitArray,
   decoder: decode.Decoder(t),
-) -> Result(t, List(decode.DecodeError)) {
+) -> Result(t, public_error.Error) {
   use dynamic_value <- result.try(
     decode_root_compound(bit_array)
-    |> result.replace_error([]),
+    |> result.map_error(error.to_public_error(_, bit_array)),
   )
   decode.run(dynamic_value, decoder)
+  |> result.map_error(public_error.DecodeErrors)
 }
 
 fn decode_named_root_compound(
   bit_array: BitArray,
-) -> Result(#(String, Dynamic), Nil) {
+) -> Result(#(String, Dynamic), error.InternalError) {
   use #(tag_type, bit_array) <- result.try(decode_tag_type(bit_array))
   case tag_type {
     tag_type.Compound -> {
@@ -43,40 +49,48 @@ fn decode_named_root_compound(
       use compound <- result.try(decode_tag_of_type(bit_array, tag_type))
       Ok(#(name, pair.first(compound)))
     }
-    _ -> Error(Nil)
+    _ -> Error(error.InvalidRootTagType(tag_type))
   }
 }
 
-fn decode_root_compound(bit_array: BitArray) -> Result(Dynamic, Nil) {
+fn decode_root_compound(
+  bit_array: BitArray,
+) -> Result(Dynamic, error.InternalError) {
   use #(tag_type, bit_array) <- result.try(decode_tag_type(bit_array))
   case tag_type {
     tag_type.Compound -> {
       use result <- result.try(decode_tag_of_type(bit_array, tag_type))
       Ok(pair.first(result))
     }
-    _ -> Error(Nil)
+    _ -> Error(error.InvalidRootTagType(tag_type))
   }
 }
 
 pub fn decode_tag(
-  bit_array: BitArray,
+  original_bit_array: BitArray,
   decoder: decode.Decoder(t),
-) -> Result(t, List(decode.DecodeError)) {
+) -> Result(t, public_error.Error) {
   use #(tag_type, bit_array) <- result.try(
-    decode_tag_type(bit_array) |> result.replace_error([]),
+    decode_tag_type(original_bit_array)
+    |> result.map_error(error.to_public_error(_, original_bit_array)),
   )
   use #(dynamic_value, _) <- result.try(
-    decode_tag_of_type(bit_array, tag_type) |> result.replace_error([]),
+    decode_tag_of_type(bit_array, tag_type)
+    |> result.map_error(error.to_public_error(_, original_bit_array)),
   )
   decode.run(dynamic_value, decoder)
+  |> result.map_error(public_error.DecodeErrors)
 }
 
 fn decode_tag_type(
   bit_array: BitArray,
-) -> Result(#(tag_type.TagType, BitArray), Nil) {
-  use #(byte, bit_array) <- result.try(decode_byte(bit_array))
-  use tag_type <- result.try(tag_type.from_int(byte))
-  Ok(#(tag_type, bit_array))
+) -> Result(#(tag_type.TagType, BitArray), error.InternalError) {
+  use #(byte, new_bit_array) <- result.try(decode_byte(bit_array))
+  use tag_type <- result.try(
+    tag_type.from_int(byte)
+    |> result.map_error(error.InvalidTagType(_, bit_array)),
+  )
+  Ok(#(tag_type, new_bit_array))
 }
 
 fn decode_tag_of_type(
@@ -110,7 +124,7 @@ fn to_dynamic(result: DecoderResult(a), converter: fn(a) -> dynamic.Dynamic) {
 fn decode_byte(bit_array: BitArray) -> DecoderResult(Int) {
   case bit_array {
     <<byte:int-signed-big-size(8), bit_array:bytes>> -> Ok(#(byte, bit_array))
-    _ -> Error(Nil)
+    _ -> Error(error.UnableToDecodeTag(tag_type.Byte, bit_array))
   }
 }
 
@@ -118,35 +132,35 @@ fn decode_short(bit_array: BitArray) -> DecoderResult(Int) {
   case bit_array {
     <<short:int-signed-big-size(16), bit_array:bytes>> ->
       Ok(#(short, bit_array))
-    _ -> Error(Nil)
+    _ -> Error(error.UnableToDecodeTag(tag_type.Short, bit_array))
   }
 }
 
 fn decode_int(bit_array: BitArray) -> DecoderResult(Int) {
   case bit_array {
     <<int:int-signed-big-size(32), bit_array:bytes>> -> Ok(#(int, bit_array))
-    _ -> Error(Nil)
+    _ -> Error(error.UnableToDecodeTag(tag_type.Int, bit_array))
   }
 }
 
 fn decode_long(bit_array: BitArray) -> DecoderResult(Int) {
   case bit_array {
     <<long:int-signed-big-size(64), bit_array:bytes>> -> Ok(#(long, bit_array))
-    _ -> Error(Nil)
+    _ -> Error(error.UnableToDecodeTag(tag_type.Long, bit_array))
   }
 }
 
 fn decode_float(bit_array: BitArray) -> DecoderResult(Float) {
   case bit_array {
     <<float:float-big-size(32), bit_array:bytes>> -> Ok(#(float, bit_array))
-    _ -> Error(Nil)
+    _ -> Error(error.UnableToDecodeTag(tag_type.Float, bit_array))
   }
 }
 
 fn decode_double(bit_array: BitArray) -> DecoderResult(Float) {
   case bit_array {
     <<double:float-big-size(64), bit_array:bytes>> -> Ok(#(double, bit_array))
-    _ -> Error(Nil)
+    _ -> Error(error.UnableToDecodeTag(tag_type.Double, bit_array))
   }
 }
 
@@ -157,7 +171,7 @@ fn decode_byte_array(bit_array: BitArray) -> DecoderResult(BitArray) {
       byte_array:bytes-size(length),
       bit_array:bytes,
     >> -> Ok(#(byte_array, bit_array))
-    _ -> Error(Nil)
+    _ -> Error(error.UnableToDecodeTag(tag_type.ByteArray, bit_array))
   }
 }
 
@@ -175,6 +189,7 @@ fn decode_string(bit_array: BitArray) -> DecoderResult(String) {
     }
     _ -> Error(Nil)
   }
+  |> result.replace_error(error.UnableToDecodeTag(tag_type.String, bit_array))
 }
 
 fn decode_list(bit_array: BitArray) -> DecoderResult(List(Dynamic)) {
@@ -188,7 +203,7 @@ fn decode_list_of_length(
   tag_type: tag_type.TagType,
   list: List(Dynamic),
   length: Int,
-) -> Result(#(List(Dynamic), BitArray), Nil) {
+) -> Result(#(List(Dynamic), BitArray), error.InternalError) {
   case length < 1 {
     True -> Ok(#(list, bit_array))
     False -> {
@@ -208,7 +223,7 @@ fn decode_list_of_length(
 
 fn decode_compound(
   bit_array: BitArray,
-) -> Result(#(List(#(Dynamic, Dynamic)), BitArray), Nil) {
+) -> Result(#(List(#(Dynamic, Dynamic)), BitArray), error.InternalError) {
   decode_compound_elements(bit_array, dict.new())
   |> result.map(pair.map_first(_, dict.to_list))
 }
@@ -216,7 +231,7 @@ fn decode_compound(
 fn decode_compound_elements(
   bit_array: BitArray,
   dict: Dict(Dynamic, Dynamic),
-) -> Result(#(Dict(Dynamic, Dynamic), BitArray), Nil) {
+) -> Result(#(Dict(Dynamic, Dynamic), BitArray), error.InternalError) {
   use #(tag_type, bit_array) <- result.try(decode_tag_type(bit_array))
   case tag_type {
     tag_type.End -> Ok(#(dict, bit_array))
@@ -236,14 +251,14 @@ fn decode_compound_elements(
 
 fn decode_int_array(
   bit_array: BitArray,
-) -> Result(#(List(Dynamic), BitArray), Nil) {
+) -> Result(#(List(Dynamic), BitArray), error.InternalError) {
   use #(length, bit_array) <- result.try(decode_int(bit_array))
   decode_list_of_length(bit_array, tag_type.Int, [], length)
 }
 
 fn decode_long_array(
   bit_array: BitArray,
-) -> Result(#(List(Dynamic), BitArray), Nil) {
+) -> Result(#(List(Dynamic), BitArray), error.InternalError) {
   use #(length, bit_array) <- result.try(decode_int(bit_array))
   decode_list_of_length(bit_array, tag_type.Long, [], length)
 }

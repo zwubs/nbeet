@@ -1,3 +1,5 @@
+import gleam/string
+
 pub type TagType {
   End
   Byte
@@ -32,7 +34,7 @@ pub fn to_int(tag_type: TagType) {
   }
 }
 
-pub fn from_int(int: Int) -> Result(TagType, Nil) {
+pub fn from_int(int: Int) -> Result(TagType, Int) {
   case int {
     0 -> Ok(End)
     1 -> Ok(Byte)
@@ -47,6 +49,10 @@ pub fn from_int(int: Int) -> Result(TagType, Nil) {
     10 -> Ok(Compound)
     11 -> Ok(IntArray)
     12 -> Ok(LongArray)
-    _ -> Error(Nil)
+    _ -> Error(int)
   }
+}
+
+pub fn to_string(tag_type: TagType) {
+  string.inspect(tag_type)
 }
