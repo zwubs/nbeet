@@ -85,7 +85,7 @@ fn encode_byte_array(tree: BytesTree, byte_array: BitArray) {
 }
 
 fn encode_string(tree: BytesTree, string: String) {
-  let bytes = mutf8.bitarray_from_string(string)
+  let assert Ok(bytes) = mutf8.bitarray_from_string(string)
   let length = bit_array.byte_size(bytes)
   bytes_tree.append(tree, <<length:int-big-size(16), bytes:bits>>)
 }

@@ -1,6 +1,4 @@
-import gleam/bit_array
 import gleam/dict
-import gleeunit/should
 import nbeet/internal/mutf8
 
 fn cases() {
@@ -25,18 +23,18 @@ fn cases() {
 
 fn from_bit_array_case(c: String) {
   case cases() |> dict.get(c) {
-    Ok(#(s, b)) -> b |> mutf8.string_from_bitarray() |> should.equal(Ok(s))
+    Ok(#(s, b)) -> {
+      #(Ok(s), b |> mutf8.string_from_bitarray())
+    }
     Error(_) -> panic as { "Missing from bit array test case: " <> c }
   }
 }
 
 fn from_string_case(c: String) {
   case cases() |> dict.get(c) {
-    Ok(#(s, b)) ->
-      s
-      |> mutf8.bitarray_from_string()
-      |> bit_array.inspect()
-      |> should.equal(b |> bit_array.inspect())
+    Ok(#(s, b)) -> {
+      #(Ok(b), s |> mutf8.bitarray_from_string())
+    }
     Error(_) -> panic as { "Missing from bit array test case: " <> c }
   }
 }
@@ -44,67 +42,83 @@ fn from_string_case(c: String) {
 // From bit_array
 
 pub fn null_from_bitarray_test() {
-  "null" |> from_bit_array_case
+  let #(s, b) = "null" |> from_bit_array_case
+  assert s == b
 }
 
 pub fn latin_2_with_stroke_from_bitarray_test() {
-  "latin_2_with_stroke" |> from_bit_array_case
+  let #(s, b) = "latin_2_with_stroke" |> from_bit_array_case
+  assert s == b
 }
 
 pub fn canadian_syllabics_e_from_bitarray_test() {
-  "canadian_syllabics_e" |> from_bit_array_case
+  let #(s, b) = "canadian_syllabics_e" |> from_bit_array_case
+  assert s == b
 }
 
 pub fn square_kb_from_bitarray_test() {
-  "square_kb" |> from_bit_array_case
+  let #(s, b) = "square_kb" |> from_bit_array_case
+  assert s == b
 }
 
 pub fn katakana_tu_from_bitarray_test() {
-  "katakana_tu" |> from_bit_array_case
+  let #(s, b) = "katakana_tu" |> from_bit_array_case
+  assert s == b
 }
 
 pub fn korean_from_bitarray_test() {
-  "korean" |> from_bit_array_case
+  let #(s, b) = "korean" |> from_bit_array_case
+  assert s == b
 }
 
 pub fn deseret_long_e_capital_from_bitarray_test() {
-  "deseret_long_e_capital" |> from_bit_array_case
+  let #(s, b) = "deseret_long_e_capital" |> from_bit_array_case
+  assert s == b
 }
 
 pub fn deseret_short_a_capital_from_bitarray_test() {
-  "deseret_short_a_capital" |> from_bit_array_case
+  let #(s, b) = "deseret_short_a_capital" |> from_bit_array_case
+  assert s == b
 }
 
 // From string
 
 pub fn null_from_string_test() {
-  "null" |> from_string_case
+  let #(b, s) = "null" |> from_string_case
+  assert b == s
 }
 
 pub fn latin_2_with_stroke_from_string_test() {
-  "latin_2_with_stroke" |> from_string_case
+  let #(b, s) = "latin_2_with_stroke" |> from_string_case
+  assert b == s
 }
 
 pub fn canadian_syllabics_e_from_string_test() {
-  "canadian_syllabics_e" |> from_string_case
+  let #(b, s) = "canadian_syllabics_e" |> from_string_case
+  assert b == s
 }
 
 pub fn square_kb_from_string_test() {
-  "square_kb" |> from_string_case
+  let #(b, s) = "square_kb" |> from_string_case
+  assert b == s
 }
 
 pub fn katakana_tu_from_string_test() {
-  "katakana_tu" |> from_string_case
+  let #(b, s) = "katakana_tu" |> from_string_case
+  assert b == s
 }
 
 pub fn korean_from_string_test() {
-  "korean" |> from_string_case
+  let #(b, s) = "korean" |> from_string_case
+  assert b == s
 }
 
 pub fn deseret_long_e_capital_from_string_test() {
-  "deseret_long_e_capital" |> from_string_case
+  let #(b, s) = "deseret_long_e_capital" |> from_string_case
+  assert b == s
 }
 
 pub fn deseret_short_a_capital_from_string_test() {
-  "deseret_short_a_capital" |> from_string_case
+  let #(b, s) = "deseret_short_a_capital" |> from_string_case
+  assert b == s
 }
