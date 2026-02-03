@@ -1,8 +1,7 @@
 import gleam/dynamic/decode
 import gleam/float
 import gleam/list
-import gleeunit/should
-import nbeet
+import nbeet/nbt
 import simplifile
 
 pub type NestedCompound {
@@ -90,33 +89,30 @@ fn big_test_decoder() {
 pub fn big_test() {
   let assert Ok(nbt) =
     simplifile.read_bits("test/nbt/big_test/uncompressed.nbt")
-  let #(_, big_test) = should.be_ok(nbeet.java_decode(nbt, big_test_decoder()))
+  let assert Ok(#(_, big_test)) = nbt.java_decode(nbt, big_test_decoder())
 
-  should.equal(big_test.byte_test, 127)
-  should.equal(big_test.short_test, 32_767)
-  should.equal(big_test.int_test, 2_147_483_647)
-  should.equal(big_test.long_test, 9_223_372_036_854_775_807)
-  should.be_true(float.loosely_equals(
-    big_test.float_test,
-    0.49823147,
-    0.00000001,
-  ))
-  should.equal(big_test.double_test, 0.4931287132182315)
+  assert big_test.byte_test == 127
+  assert big_test.short_test == 32_767
+  assert big_test.int_test == 2_147_483_647
+  assert big_test.long_test == 9_223_372_036_854_775_807
+  assert float.loosely_equals(big_test.float_test, 0.49823147, 0.00000001)
+    == True
+  assert big_test.double_test == 0.4931287132182315
   let expected_byte_array =
     list.range(from: 0, to: 999)
     |> list.map(fn(i) { { i * i * 255 + i * 7 } % 100 })
     |> list.fold(<<>>, fn(bit_array, int) { <<bit_array:bits, int:int>> })
-  should.equal(big_test.byte_array_test, expected_byte_array)
-  should.equal(big_test.list_test, [11, 12, 13, 14, 15])
+  assert big_test.byte_array_test == expected_byte_array
+  assert big_test.list_test == [11, 12, 13, 14, 15]
   let expected_compound_list = [
     CompoundListItem(1_264_099_775_885, "Compound tag #0"),
     CompoundListItem(1_264_099_775_885, "Compound tag #1"),
   ]
-  should.equal(big_test.compound_list_test, expected_compound_list)
+  assert big_test.compound_list_test == expected_compound_list
   let expected_nested_compound =
     NestedCompounds(
       egg: NestedCompound("Eggbert", 0.5),
       ham: NestedCompound("Hampus", 0.75),
     )
-  should.equal(big_test.nested_compound_test, expected_nested_compound)
+  assert big_test.nested_compound_test == expected_nested_compound
 }
