@@ -25,15 +25,15 @@ gleam add nbeet
 ## Usage
 ### Encoding
 ```gleam
-import nbeet.{byte, compound, nbt, string}
+import nbeet/nbt
 
 pub fn encode_truth() -> Result(BitArray, Nil) {
   let nbt =
-    nbt(
+    nbt.root(
       "in beet we",
-      compound([#("trust", byte(1)), #("must", string("true")), ])
+      nbt.compound([#("trust", nbt.byte(1)), #("must", nbt.string("true")), ])
     )
-  nbeet.encode(nbt)
+  nbt.java_encode(nbt)
 }
 ```
 
@@ -41,7 +41,7 @@ pub fn encode_truth() -> Result(BitArray, Nil) {
 ```gleam
 import gleam/dynamic/decode
 import gleam/result
-import nbeet
+import nbeet/nbt
 
 pub type InBeetWe {
   InBeetWe(trust: Int, must: String)
@@ -53,9 +53,9 @@ fn truth_decoder() {
   decode.success(InBeetWe(trust, must))
 }
 
-fn decode_truth(nbt: BitArray) -> Result(InBeetWe, Nil) {
+fn decode_truth(bit_array: BitArray) -> Result(InBeetWe, Nil) {
   let decoder = truth_decoder()
-  use #(_, in_beet_we) <- result.try(nbeet.java_decode(nbt, decoder))
+  use #(_, in_beet_we) <- result.try(nbt.java_decode(bit_array, decoder))
   Ok(in_beet_we)
 }
 ```
